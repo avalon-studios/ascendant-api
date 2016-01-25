@@ -1,2 +1,2 @@
-# dilemma
-A game of dilemmas
+# Avalon
+A game of deception
