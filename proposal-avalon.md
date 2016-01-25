@@ -4,7 +4,7 @@
 
 ## Description
 
-[Avalon](https://en.wikipedia.org/wiki/The_Resistance_(game)#Avalon_variant) is a word-of-mouth game usually played with a deck of cards. Our proposal is to build the game as a networked multiplayer game for iOS (and everntually other platforms). The game would work exceedingly well as an app, as it is somewhat confusing to play with a deck of cards.
+[Avalon](https://en.wikipedia.org/wiki/The_Resistance_(game)#Avalon_variant) is a word-of-mouth game usually played with a deck of cards. Our proposal is rebuild it as a networked multiplayer game for iOS (and possibly other platforms in the future). The game would work exceedingly well as an app, as it is somewhat confusing to play with a deck of cards.
 
 We plan to build the backend in Python, with a mobile application written in Swift for our first client. The backend will manage game play, and will use WebSockets or TCP to communicate with clients for real time updates. 
 
