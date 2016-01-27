@@ -6,7 +6,7 @@ inbox.onmessage = function(message) {
   $("#chat-text").prepend("<div class='panel panel-default'><div class='panel-heading'>" + $('<span/>').text(data.handle).html() + "</div><div class='panel-body'>" + $('<span/>').text(data.text).html() + "</div></div>");
   $("#chat-text").stop().animate({
     scrollTop: 0
-  }, 0);
+  }, 400);
 };
 
 inbox.onclose = function(){
