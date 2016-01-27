@@ -10,13 +10,13 @@ inbox.onmessage = function(message) {
 };
 
 inbox.onclose = function(){
-    console.log('inbox closed');
+    console.log('inbox close');
     this.inbox = new WebSocket(inbox.url);
 
 };
 
 outbox.onclose = function(){
-    console.log('outbox closed');
+    console.log('outbox close');
     this.outbox = new WebSocket(outbox.url);
 };
 
