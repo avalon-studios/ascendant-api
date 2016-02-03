@@ -12,7 +12,6 @@ inbox.onmessage = function(message) {
 inbox.onclose = function(){
     console.log('inbox close');
     this.inbox = new WebSocket(inbox.url);
-
 };
 
 outbox.onclose = function(){
