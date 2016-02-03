@@ -81,6 +81,7 @@ def on_join(data):
     # create the player and join the room
     player = ascendant.Player(player_id, name)
     join_room(game_id)
+    join_room(player_id)
 
     debug(games)
     game = games[game_id]
@@ -144,17 +145,20 @@ def on_ready(data):
     game = games[game_id]
     player = game.get_player(player_id)
 
+    debug('player {} is ready'.format(player.player_id))
     player.ready = True
 
     if game.all_ready():
+        debug('errybody ready')
         game.start_round()
         socketio.emit('propose_mission',
         {
-            'leader': game.get_leader(),
-            'mission_number': game.round_num
+            'leader': game.get_leader().to_dict(),
+            'mission_number': game.round_num,
+            'number_players': game.current_round.num_on_mission,
         },
         json=True,
-        room=game_id
+        room=game_id,
     )
 
     return {'success': True}
