@@ -17,6 +17,13 @@ import math
 # constants are defined in settings, also holds AscendantError
 from settings import *
 
+class Player(object):
+    """Game player class"""
+
+    def __init__(self, player_id, real_name):
+        self.player_id = player_id
+        self.real_name = real_name
+
 class game_round(object):
     def __init__(self, num_required_to_fail, num_on_mission):
         self.num_required_to_fail = num_required_to_fail
@@ -46,7 +53,7 @@ class game_round(object):
 # class that keeps track of the game state
 class ascendant_game(object):
 
-    # init file takes the user-friendly name and 
+    # init file takes the game_id, user-friendly name and 
     # the uuid of the player who started the room
     def __init__(self, game_id, uuid_name, uf_name):
         self.game_id = game_id
@@ -60,9 +67,6 @@ class ascendant_game(object):
 
         # number won by bad team
         self.bad_won = 0  
-
-        # number stalled (resets each round
-        self.stalled = 0
 
         # list of good players
         self.good_players = []
@@ -95,13 +99,16 @@ class ascendant_game(object):
 
     # function that will be called when user selects "start game"
     # allocates who is good and bad
+    #
+    # raises an exception if it doesn't work, else returns
+    # list of good players, list of bad players
     def start_game(self):
         # this should be called outside this function before 
         # the web handler calls this function, but just to make
         # sure
         if not self.is_ready_to_start():
             # yell at the developer who didn't check this
-            return False
+            raise AscendantError("Not Enough Players")
 
         shuffled_uuids = self.player_map.keys()
         random.shuffle(shuffled_uuids)
@@ -111,7 +118,7 @@ class ascendant_game(object):
         self.good_players = shuffled_uuids[0:int(math.floor((2.0/3.0) * len(self.player_map)))]
         self.bad_players = shuffled_uuids[int(math.floor((2.0/3.0) * len(self.player_map))):]
 
-        return True
+        return self.good_players, self.bad_players
 
     
 
