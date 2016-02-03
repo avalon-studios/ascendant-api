@@ -28,6 +28,10 @@ JOIN_ACTION             = 'join'
 VOTE_ACTION             = 'vote'
 PROPOSE_MISSION_ACTION  = 'propose'
 
+# dictionary of the current game objects -- there is probably a better way to do this,
+# but for now this is the easiest.
+current_games = {}
+
 if __name__ == '__main__':
     socketio.run(app)
 

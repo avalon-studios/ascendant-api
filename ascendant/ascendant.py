@@ -13,14 +13,44 @@ import random
 import math
 
 # local libraries
+
+# constants are defined in settings, also holds AscendantError
 from settings import *
 
+class game_round(object):
+    def __init__(self, num_required_to_fail, num_on_mission):
+        self.num_required_to_fail = num_required_to_fail
+        self.num_on_mission = num_on_mission
+
+        self.stalled = 0
+        self.players_on_mission = []
+
+        self.num_passes = 0
+        self.num_fails = 0
+
+    def set_mission_members(self, member_list):
+        # this shouldn't ever happen
+        if len(member_list) != self.num_on_mission:
+            raise AscendantError('Given num of players on mission: {}; should be {}'.format(len(member_list), self.num_on_mission))
+
+            
+
+    def vote(self, passfail):
+        if passfail:
+            self.num_passes += 1
+        else:
+            self.num_fails += 1
+
+
+
 # class that keeps track of the game state
-class ascendant_game:
+class ascendant_game(object):
 
     # init file takes the user-friendly name and 
     # the uuid of the player who started the room
-    def __init__(self, uuid_name, uf_name):
+    def __init__(self, game_id, uuid_name, uf_name):
+        self.game_id = game_id
+
         # player_map maps uuid to user-friendly name
         self.player_map = dict()
         self.player_map[uuid_name] = uf_name         
@@ -83,6 +113,7 @@ class ascendant_game:
 
         return True
 
+    
 
     
 
