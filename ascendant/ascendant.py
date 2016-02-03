@@ -113,7 +113,7 @@ class AscendantGame(object):
             # yell at the developer who didn't check this
             raise AscendantError("Not Enough Players")
 
-        shuffled_uuids = [self.player_list.keys()
+        shuffled_uuids = self.player_list[:]
         random.shuffle(shuffled_uuids)
 
         # Essentially it is split up such that 2/3
