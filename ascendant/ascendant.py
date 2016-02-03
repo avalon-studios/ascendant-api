@@ -10,9 +10,10 @@ This particular library assumes that all the data necessary for each function to
 """
 # python libraries
 import random
+import math
 
 # local libraries
-from .settings import *
+from settings import *
 
 # class that keeps track of the game state
 class ascendant_game:
@@ -21,6 +22,7 @@ class ascendant_game:
     # the uuid of the player who started the room
     def __init__(self, uuid_name, uf_name):
         # player_map maps uuid to user-friendly name
+        self.player_map = dict()
         self.player_map[uuid_name] = uf_name         
 
         # number won by good team
@@ -49,10 +51,15 @@ class ascendant_game:
         else:
             return False
 
-    # checks to make sure there is enough players
+    def is_ready_to_start(self):
+        if len(self.player_map) >= MIN_NUM_OF_PLAYERS:
+            return True
+        else:
+            return False
+
     # returns the number of players necessary to have 
     # enough, 0 if the game is ready to start
-    def is_ready_to_start(self):
+    def how_many_needed_to_start(self):
         x = MIN_NUM_OF_PLAYERS - len(self.player_map)
         return x if x > 0 else 0
 
@@ -62,7 +69,7 @@ class ascendant_game:
         # this should be called outside this function before 
         # the web handler calls this function, but just to make
         # sure
-        if self.is_ready_to_start() != 0:
+        if not self.is_ready_to_start():
             # yell at the developer who didn't check this
             return False
 
@@ -71,7 +78,7 @@ class ascendant_game:
 
         # Essentially it is split up such that 2/3
         # of the players are good and 1/3 are bad
-        self.good_players = shuffled_uuids[0:int(math.floor((2.0/3.0) * len(self.player_map))) + 1]
+        self.good_players = shuffled_uuids[0:int(math.floor((2.0/3.0) * len(self.player_map)))]
         self.bad_players = shuffled_uuids[int(math.floor((2.0/3.0) * len(self.player_map))):]
 
         return True
