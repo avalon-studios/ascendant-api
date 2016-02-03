@@ -23,8 +23,9 @@ class Player(object):
     def __init__(self, player_id, real_name):
         self.player_id = player_id
         self.real_name = real_name
+        self.team = -1
 
-class game_round(object):
+class GameRound(object):
     def __init__(self, num_required_to_fail, num_on_mission):
         self.num_required_to_fail = num_required_to_fail
         self.num_on_mission = num_on_mission
@@ -51,16 +52,18 @@ class game_round(object):
 
 
 # class that keeps track of the game state
-class ascendant_game(object):
+class AscendantGame(object):
 
-    # init file takes the game_id, user-friendly name and 
-    # the uuid of the player who started the room
-    def __init__(self, game_id, uuid_name, uf_name):
+    # init file takes the game_id and Player that is
+    # the creator
+    def __init__(self, game_id, creator):
         self.game_id = game_id
 
-        # player_map maps uuid to user-friendly name
-        self.player_map = dict()
-        self.player_map[uuid_name] = uf_name         
+        # player list
+        self. player_list = [creator]
+        
+        # keep track of creator
+        self.creator = creator
 
         # number won by good team
         self.good_won = 0 
@@ -79,14 +82,14 @@ class ascendant_game(object):
     #
     # look into seeing if this needs to have a thread lock
     def add_player(self, uuid_name, uf_name):
-        if len(self.player_map) < MAX_NUM_OF_PLAYERS:
-            self.player_map[uuid_name] = uf_name
+        if len(self.player_list) < MAX_NUM_OF_PLAYERS:
+            player_list
             return True
         else:
             return False
 
     def is_ready_to_start(self):
-        if len(self.player_map) >= MIN_NUM_OF_PLAYERS:
+        if len(self.player_list) >= MIN_NUM_OF_PLAYERS:
             return True
         else:
             return False
@@ -94,7 +97,7 @@ class ascendant_game(object):
     # returns the number of players necessary to have 
     # enough, 0 if the game is ready to start
     def how_many_needed_to_start(self):
-        x = MIN_NUM_OF_PLAYERS - len(self.player_map)
+        x = MIN_NUM_OF_PLAYERS - len(self.player_list)
         return x if x > 0 else 0
 
     # function that will be called when user selects "start game"
@@ -110,13 +113,13 @@ class ascendant_game(object):
             # yell at the developer who didn't check this
             raise AscendantError("Not Enough Players")
 
-        shuffled_uuids = self.player_map.keys()
+        shuffled_uuids = [self.player_list.keys()
         random.shuffle(shuffled_uuids)
 
         # Essentially it is split up such that 2/3
         # of the players are good and 1/3 are bad
-        self.good_players = shuffled_uuids[0:int(math.floor((2.0/3.0) * len(self.player_map)))]
-        self.bad_players = shuffled_uuids[int(math.floor((2.0/3.0) * len(self.player_map))):]
+        self.good_players = shuffled_uuids[0:int(math.floor((2.0/3.0) * len(self.player_list)))]
+        self.bad_players = shuffled_uuids[int(math.floor((2.0/3.0) * len(self.player_list))):]
 
         return self.good_players, self.bad_players
 
