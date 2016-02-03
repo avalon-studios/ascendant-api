@@ -15,8 +15,9 @@ from string import ascii_uppercase as uppercase
 
 # local libraries
 
-# constants are defined in settings, also holds AscendantError
+# constants are defined in settings
 from settings import *
+from AscendantError import *
 
 class Player(object):
     """Game player class"""
@@ -138,7 +139,7 @@ class AscendantGame(object):
         # sure
         if not self.is_ready_to_start():
             # yell at the developer who didn't check this
-            raise AscendantError("Not Enough Players")
+            raise NotEnoughPlayers("Not Enough Players")
 
         shuffled_players = self.players[:]
         random.shuffle(shuffled_players)
