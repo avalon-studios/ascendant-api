@@ -12,7 +12,7 @@ import logging
 import json
 import random
 from flask import Flask, render_template
-from flask_socketio import SocketIO, send, emit
+from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
 # set up Redis environment for use with heroku
 REDIS_URL = os.environ['REDISCLOUD_URL']
@@ -43,21 +43,29 @@ def hello():
     return render_template('index.html')
 
 @socketio.on('create')
-def create(json):
-    print(json)
-    jsonString = {"game_id": "fwcs", "player": {"id": "abc","name": "Kyle","team": 0}}
-    players = [{"id": "abc","name": "Kyle","team": 0}]
-    emit('create', jsonString, json=True)
-    emit('update_players', players, json=True)
+def on_create(data):
+    
+@socketio.on('join')
+def on_join(data):
+    player_id = data['id']
 
 # class to house the backend and websocket interface
 class GameInterface(object):
     """Game backend class"""
 
-    def start(self):
-        socketio.run(app)
+    players = []
 
-    @socketio.on('json')
-    def handle_json(self, json):
-        send(json, json=True)
+    def __init__(self, game_id, creator):
+        self.game_id = game_id
+        self.creator = creator
+        self.players.append(creator)
 
+    def update_players():
+        socketio.send(players, json=True, room=game_id)
+
+class Player(object):
+    """Game player class"""
+
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
