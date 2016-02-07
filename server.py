@@ -82,7 +82,7 @@ def inbox(ws):
         if message:
             redis.incr("messageTotal")
             app.logger.info(u'Inserting message: {} of size: {}'.format(message, redis.get("messageTotal")))
-            received = redis.publish(REDIS_CHAN, message)
+            received = redis.publish(REDIS_CHAN, message + redis.get("messageTotal"))
 
 
 @sockets.route('/receive')
