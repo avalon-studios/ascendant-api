@@ -32,6 +32,7 @@ class ChatBackend(object):
         self.clients = list()
         self.pubsub = redis.pubsub()
         self.pubsub.subscribe(REDIS_CHAN)
+        redis.set("messageTotal", 1)
 
     def __iter_data(self):
         for message in self.pubsub.listen():
@@ -62,13 +63,13 @@ class ChatBackend(object):
         """Maintains Redis subscription in the background."""
         gevent.spawn(self.run)
 
+
 chats = ChatBackend()
 chats.start()
 
-
 @app.route('/')
 def hello():
-    redis.set("messageTotal", 1)
+    
     return render_template('index.html')
 
 @sockets.route('/submit')
@@ -77,12 +78,13 @@ def inbox(ws):
     while ws.socket is not None:
         # Sleep to prevent *contstant* context-switches.
         gevent.sleep(0.1)
+        redis.incr("messageTotal")
         message = ws.receive()
+        message = message + " extra"
 
         if message:
-            redis.incr("messageTotal")
-            app.logger.info(u'Inserting message: {} of size: {}'.format(message, redis.get("messageTotal")))
-            received = redis.publish(REDIS_CHAN, message + redis.get("messageTotal"))
+            app.logger.info(u'Inserting message: {}'.format(message))
+            received = redis.publish(REDIS_CHAN, message)
 
 
 @sockets.route('/receive')
