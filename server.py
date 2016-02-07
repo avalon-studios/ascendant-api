@@ -68,6 +68,7 @@ chats.start()
 
 @app.route('/')
 def hello():
+    redis.set("messageTotal", 1)
     return render_template('index.html')
 
 @sockets.route('/submit')
@@ -79,9 +80,10 @@ def inbox(ws):
         message = ws.receive()
 
         if message:
-            app.logger.info(u'Inserting message: {}'.format(message))
+            redis.incr("messageTotal")
+            app.logger.info(u'Inserting message: {}'.format(message + " messageNum: " +redis.get("messageTotal")))
             received = redis.publish(REDIS_CHAN, message)
-            redis.set("messageTotal", "1")
+
 
 @sockets.route('/receive')
 def outbox(ws):
