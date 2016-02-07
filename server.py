@@ -32,7 +32,7 @@ class ChatBackend(object):
         self.clients = list()
         self.pubsub = redis.pubsub()
         self.pubsub.subscribe(REDIS_CHAN)
-        redis.set("messageTotal", 1)
+        #redis.set("messageTotal", 1)
 
     def __iter_data(self):
         for message in self.pubsub.listen():
@@ -78,7 +78,7 @@ def inbox(ws):
     while ws.socket is not None:
         # Sleep to prevent *contstant* context-switches.
         gevent.sleep(0.1)
-        redis.incr("messageTotal")
+        #redis.incr("messageTotal")
         message = ws.receive()
         message.data = message.data + " extra"
 
