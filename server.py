@@ -80,7 +80,8 @@ def inbox(ws):
 
         if message:
             app.logger.info(u'Inserting message: {}'.format(message))
-            redis.publish(REDIS_CHAN, message)
+            received = redis.publish(REDIS_CHAN, message)
+            redis.set("messageTotal", "1")
 
 @sockets.route('/receive')
 def outbox(ws):
