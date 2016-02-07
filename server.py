@@ -81,7 +81,7 @@ def inbox(ws):
 
         if message:
             redis.incr("messageTotal")
-            app.logger.info(u'Inserting message: {}'.format(message + " messageNum: " +redis.get("messageTotal")))
+            app.logger.info(u'Inserting message: {} of size: {}'.format(message, redis.get("messageTotal")))
             received = redis.publish(REDIS_CHAN, message)
 
 
