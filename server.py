@@ -80,7 +80,7 @@ def inbox(ws):
         gevent.sleep(0.1)
         redis.incr("messageTotal")
         message = ws.receive()
-        message = message + " extra"
+        message.data = message.data + " extra"
 
         if message:
             app.logger.info(u'Inserting message: {}'.format(message))
