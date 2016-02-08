@@ -9,29 +9,33 @@ This simple application uses WebSockets to run a primitive chat server.
 
 import os
 import logging
+
+#redis code
 import redis
+
+#gevent code
 import gevent
+
+#flask code
 from flask import Flask, render_template
 from flask_sockets import Sockets
 
-REDIS_URL = os.environ['REDISCLOUD_URL']
-REDIS_CHAN = 'chat'
-
+#flask code
 app = Flask(__name__)
 app.debug = 'DEBUG' in os.environ
-
 sockets = Sockets(app)
-redis = redis.from_url(REDIS_URL)
 
+#redis code
+r = redis.from_url(os.environ['REDISCLOUD_URL'])
 
-
+#python code
 class ChatBackend(object):
     """Interface for registering and updating WebSocket clients."""
 
     def __init__(self):
         self.clients = list()
-        self.pubsub = redis.pubsub()
-        self.pubsub.subscribe(REDIS_CHAN)
+        self.pubsub = r.pubsub()
+        self.pubsub.subscribe('chat')
         #redis.set("messageTotal", 1)
 
     def __iter_data(self):
@@ -63,15 +67,25 @@ class ChatBackend(object):
         """Maintains Redis subscription in the background."""
         gevent.spawn(self.run)
 
-
+#calls __init__, which creates a list of clients
+#sets the pubsub to the redis pubsub, and subscribes to the 'chat' channel
 chats = ChatBackend()
+
+#spawns a gevent, using the method run
+#run will loop through every message (gotten from pubsub.listen()) to get data
+    #loop through every client
+        #spawn a gevent using the method send, and arguments client and data
+
+        #send will try to do a client.send(data), but will remove the client
+        #if an error occurs
 chats.start()
 
+#flask code
 @app.route('/')
 def hello():
-    
     return render_template('index.html')
 
+#flask code
 @sockets.route('/submit')
 def inbox(ws):
     """Receives incoming chat messages, inserts them into Redis."""
@@ -84,12 +98,12 @@ def inbox(ws):
 
         if message:
             app.logger.info(u'Inserting message: {}'.format(message))
-            received = redis.publish(REDIS_CHAN, message)
+            received = r.publish('chat', message)
 
-
+#flask code
 @sockets.route('/receive')
 def outbox(ws):
-    """Sends outgoing chat messages, via `ChatBackend`."""
+    """Sends (relative to client) outgoing chat messages, via `ChatBackend`."""
     chats.register(ws)
 
     while ws.socket is not None:
