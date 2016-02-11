@@ -79,10 +79,12 @@ def inbox(ws):
         gevent.sleep(0.1)
         message = ws.receive()
 
+        print(message)
+        
         try:
             message_json = json.loads(message)
             print('Loaded message as json')
-            print(message_json[u'action'])
+            print(message_json)
         except:
             print('Failed to parse message as json')
 
