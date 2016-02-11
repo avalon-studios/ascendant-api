@@ -11,6 +11,7 @@ import os
 import logging
 import redis
 import gevent
+import json
 from flask import Flask, render_template
 from flask_sockets import Sockets
 
@@ -77,6 +78,12 @@ def inbox(ws):
         # Sleep to prevent *contstant* context-switches.
         gevent.sleep(0.1)
         message = ws.receive()
+
+        try:
+            json.loads(message)
+            app.logger.info(u'Loaded message as json')
+        except:
+            app.logger.info(u'Failed to parse message as json')
 
         if message:
             app.logger.info(u'Inserting message: {}'.format(message))
