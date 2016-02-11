@@ -130,7 +130,7 @@ def create_room(client):
     while games[new_id] is not None:
         new_id = room_id_generator()
 
-    new_game = GameBackend()
+    new_game = GameBackend(new_id)
     new_game.join(client)
 
     games[new_id] = new_game
@@ -148,7 +148,7 @@ def vote(client, room_id, vote):
         game.vote()
     except:
         print('Game does not seem to exist')
-        
+
 def room_id_generator():
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(4))
 
