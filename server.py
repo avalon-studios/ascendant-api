@@ -80,8 +80,9 @@ def inbox(ws):
         message = ws.receive()
 
         try:
-            json.loads(message)
+            message_json = json.loads(message)
             print('Loaded message as json')
+            print(message_json["action"])
         except:
             print('Failed to parse message as json')
 
