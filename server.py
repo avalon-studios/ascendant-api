@@ -81,9 +81,9 @@ def inbox(ws):
 
         try:
             json.loads(message)
-            app.logger.info(u'Loaded message as json')
+            print('Loaded message as json')
         except:
-            app.logger.info(u'Failed to parse message as json')
+            print('Failed to parse message as json')
 
         if message:
             app.logger.info(u'Inserting message: {}'.format(message))
