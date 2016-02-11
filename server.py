@@ -71,6 +71,19 @@ chats.start()
 def hello():
     return render_template('index.html')
 
+@sockets.route('/')
+def recieve(ws):
+    while ws.socket is not None:
+
+        gevent.sleep(0.1)
+        message = ws.recieve()
+
+        try:
+            action = json.loads(message)
+            print(action['action'])
+        except:
+            print('Failed to parse action')
+
 @sockets.route('/submit')
 def inbox(ws):
     """Receives incoming chat messages, inserts them into Redis."""
