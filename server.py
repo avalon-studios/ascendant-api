@@ -72,11 +72,11 @@ def hello():
     return render_template('index.html')
 
 @sockets.route('/')
-def recieve(ws):
+def receive(ws):
     while ws.socket is not None:
 
         gevent.sleep(0.1)
-        message = ws.recieve()
+        message = ws.receive()
 
         try:
             action = json.loads(message)
