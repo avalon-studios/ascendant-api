@@ -84,6 +84,7 @@ def inbox(ws):
         try:
             message_json = json.loads(message)
             print('Loaded message as json')
+            print(type(message_json))
             print(message_json)
             print(message_json['action'])
         except:
