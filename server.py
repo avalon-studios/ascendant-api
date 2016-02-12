@@ -75,6 +75,20 @@ chats.start()
 
 games = {}
 
+def create_room(client):
+    new_id = room_id_generator()
+
+    while games[new_id] is not None:
+        new_id = room_id_generator()
+
+    new_game = GameBackend(new_id)
+    new_game.join(client)
+
+    games[new_id] = new_game
+
+def room_id_generator():
+    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(4))
+
 class GameBackend(object):
     """Manages game state and provides interface for interacting with a game."""
 
@@ -83,9 +97,25 @@ class GameBackend(object):
         self.pubsub = redis.pubsub()
         self.pubsub.subscribe(channel)
 
-    def join(self, client):
-        self.players.append(client)
+    def join(self, player):
+        self.players.append(player)
 
+    def vote(self, player, action_json):
+        print('vote')
+
+    def propose_mission(self, player, action_json):
+        print('propose')
+
+    def parse_action(self, action_json, player):
+        
+        action = action_json['action']
+
+        if action == JOIN_ACTION:       
+            self.join(player)
+        elif action == VOTE_ACTION:
+            self.vote(player, action_json)
+        elif action == PROPOSE_MISSION_ACTION:
+            self.propose_mission(player, action_json)
 
 
 @app.route('/')
@@ -100,57 +130,21 @@ def receive(ws):
         received_string = ws.receive()
 
         received_json = None
-        action = None
-        game_room = None
+        game = None
 
         try:
             received_json = json.loads(received_string)
-            action = received_json['action']
             room_id = received_json['room']
+            game = games[room_id]
         except:
-            print('Failed to parse action')
+            # probably make a room here? game = create_room(ws)?
+            print('Invalid room, game does not seem to exist')
             continue
 
-        if action == CREATE_ACTION:     
-            create_room(ws)
-        elif action == JOIN_ACTION:       
-            join_game(ws, room_id)
-        elif action == VOTE_ACTION:
-            try:
-                vote = received_json['vote']
-                vote(ws, room_id, vote)
-            except:
-                print('Attemped to vote with no vote value')
-        elif action == PROPOSE_MISSION_ACTION:
+        game.parse_action(received_json)
 
 
-def create_room(client):
-    new_id = room_id_generator()
 
-    while games[new_id] is not None:
-        new_id = room_id_generator()
-
-    new_game = GameBackend(new_id)
-    new_game.join(client)
-
-    games[new_id] = new_game
-
-def join_game(client, room_id):
-    try:
-        game = games[room_id]
-        game.join(client)
-    except:
-        print('Game does not seem to exist')
-
-def vote(client, room_id, vote):
-    try:
-        game = games[room_id]
-        game.vote()
-    except:
-        print('Game does not seem to exist')
-
-def room_id_generator():
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(4))
 
 @sockets.route('/submit')
 def inbox(ws):
