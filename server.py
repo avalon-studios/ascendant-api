@@ -122,7 +122,7 @@ class GameBackend(object):
 def hello():
     return render_template('index.html')
 
-@sockets.route('/')
+@sockets.route('/game')
 def receive(ws):
     while ws.socket is not None:
 
