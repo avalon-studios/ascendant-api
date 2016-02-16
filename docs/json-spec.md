@@ -5,7 +5,7 @@
 
 Every JSON object (from now on referred to as an "action") sent or received will have an `action` key, used to identify what action is being performed. Each action will also have a `user` key, with an id for the user performing the action.
 
-### Game Creation and Joining:
+### Game creation and joining, and similar:
 
 #### Creation:
 
@@ -68,7 +68,16 @@ Upon someone successfully joining, or a player leaving, the server should send a
 			}]
 	}
 
-#### Starting the game
+#### Starting the game:
+
+Only the person who created the game has the ability to start it:
+
+	{
+		'action': 'start',
+		'game_id': String,
+	}
+
+
 
 
 
