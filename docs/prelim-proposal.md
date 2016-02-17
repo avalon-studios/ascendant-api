@@ -1,6 +1,10 @@
 ## Avalon the Game
 - Team Name: Avalon Studio
-- Members: Kyle Bashour, Joseph Connor, Elliot Greenlee, Tyler Stuessi
+- Members (Name, Gitlab): 
+	- Kyle Bashour, kylebshr 
+	- Joseph Connor, joseph346
+	- Elliot Greenlee, ElliotGreenlee
+	- Tyler Stuessi, tstuessi
 
 ## Description
 
@@ -9,3 +13,6 @@
 We plan to build the backend in Python, with a mobile application written in Swift for our first client. The backend will manage game play, and will use WebSockets or TCP to communicate with clients for real time updates. 
 
 Our team definitely has the experience to build this; Kyle Bashour interned at mobile devshop Metova over the summer, and has experience building apps on iOS (the first platform we'll target). Tyler Stuessi has experience with networking and Python through is job at OIT. Joseph Connor has tons of experience working with backends and networking through an internship at Cisco. Elliot Greenlee learned mysterious things he cannot talk about during his time at L3. 
+
+We'd also like to petition to use Github, instead of Gitlab, to develop this project. We all have extensive development experience, and would appreciate the chance to add to our experience on Github. We actually already created an organization and repos for our project (with some initial setup already done). Another reason we'd lke to use Github is so we can use [Travis CI](https://travis-ci.org) for continuous integration (something we've already set up as well). You can look at the repos [here](https://github.com/avalon-studios/), and since they're not private, it should be easy to monitor our progress. It would be easy to migrate to Gitlab if necessary though. 
+ 
