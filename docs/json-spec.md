@@ -37,7 +37,7 @@ Upon creation of the game, the server should send the client a user_id for the g
 
 	{
 		'action': 'create',
-		'id': String,
+		'game_id': String,
 		'player': Player
 	}
 
@@ -61,6 +61,7 @@ The server should reply with a success bool, and error_message if success is fal
 
 	{
 		'action': 'join',
+		'game_id': String
 		'player': Player,
 		'players': [Player, Player,...]
 	}
@@ -90,8 +91,7 @@ Upon receiving `start`, the server should check that there are enough players. I
 	/* TO CLIENT */
 
 	{
-		'action': 'start',
-		'success': Bool,
+		'action': 'start_error',
 		'error_message': String
 	}
 	
@@ -101,8 +101,7 @@ If, however, there are enough players, the server should assign players to teams
 
 	{
 		'action': 'assign_roles',
-		'team': Int, (0 = good, 1 = bad)
-		'role': Int (optional),
+		'player': Player,
 		'players': [Player, Player,...] // Need to update players once teams have been set
 	}
 
