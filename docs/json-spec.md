@@ -61,8 +61,7 @@ The server should reply with a success bool, and error_message if success is fal
 
 	{
 		'action': 'join',
-		'success': Bool,
-		'error_message': String,
+		'player': Player,
 		'players': [Player, Player,...]
 	}
 	
