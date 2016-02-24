@@ -46,5 +46,3 @@ class GameInterface(object):
     def handle_json(self, json):
         send(json, json=True)
 
-a = GameInterface()
-a.start()
