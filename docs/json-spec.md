@@ -10,6 +10,14 @@
 
 Every JSON object (from now on referred to as an "action") sent or received will have an `action` key, used to identify what action is being performed. Each action will also have a `user` key, with an id for the user performing the action.
 
+Whenever a `Player` object is used, it should be a json object structured like so:
+
+	{
+		'id': String,
+		'name': String,
+		'team': Int (0 = good, 1 = bad)
+	}
+
 ### Game creation and joining, and starting:
 
 #### Creation:
@@ -29,8 +37,8 @@ Upon creation of the game, the server should send the client a user_id for the g
 
 	{
 		'action': 'create',
-		'user_id': String,
-		'game_id': String
+		'game_id': String,
+		'player': Player
 	}
 
 If the server cannot create a game, game_id should be null.
@@ -53,17 +61,9 @@ The server should reply with a success bool, and error_message if success is fal
 
 	{
 		'action': 'join',
-		'success': Bool,
-		'error_message': String,
-		'players':
-			[{
-				'user_id': String,
-				'name': String
-			},
-			{
-				'user_id': String,
-				'name': String
-			}]
+		'game_id': String
+		'player': Player,
+		'players': [Player, Player,...]
 	}
 	
 Upon someone successfully joining, or a player leaving, the server should send an updated player list to *every* client in the game:
@@ -72,15 +72,7 @@ Upon someone successfully joining, or a player leaving, the server should send a
 
 	{
 		'action': 'update_players',
-		'players':
-			[{
-				'user_id': String,
-				'name': String
-			},
-			{
-				'user_id': String,
-				'name': String
-			}]
+		'players': [Player, Player,...]
 	}
 
 #### Starting the game:
@@ -99,8 +91,7 @@ Upon receiving `start`, the server should check that there are enough players. I
 	/* TO CLIENT */
 
 	{
-		'action': 'start',
-		'success': Bool,
+		'action': 'start_error',
 		'error_message': String
 	}
 	
@@ -110,21 +101,8 @@ If, however, there are enough players, the server should assign players to teams
 
 	{
 		'action': 'assign_roles',
-		'team': Enum/Int?, 				// PLEASE DISCUSS!
-		'role': Enum (optional),
-		'players': 						// Need to update players with teams, so assassins can see who is who
-			[{
-				'user_id': String,
-				'name': String,
-				'team': Enum,				// discuss of course
-				'role': Enum (optional)
-			},
-			{
-				'user_id': String,
-				'name': String,
-				'team': Enum,	
-				'role': Enum (optional)
-			}]
+		'player': Player,
+		'players': [Player, Player,...] // Need to update players once teams have been set
 	}
 
 ### Gameplay Actions
@@ -136,8 +114,8 @@ Once the game has begun, the server needs to begin selecting leaders. The action
 	/* TO CLIENT */
 
 	{
-		'action': 'select_leader',
-		'leader': String 			// user_id of the leader
+		'action': 'propose_mission',
+		'leader': String 				// user_id of the leader
 	}
 
 #### Proposing a mission team
@@ -161,7 +139,7 @@ After a mission has been proposed, the player list gets sent to every client so 
 	/* TO CLIENT */
 	
 	{
-		'action': 'propose_mission',
+		'action': 'do_proposal_vote',
 		'player_ids':
 			[
 				String,
@@ -186,9 +164,9 @@ The server tells the clients whether or not the vote passed, so it can update th
 	/* TO CLIENT */
 	
 	{
-		'action': 'proposal_vote',
+		'action': 'proposal_vote_result',
 		'pass': Bool,
-		'number_failed': Int, 			// So the client can update UI on number of unapproved missions
+		'number_failed': Int, 			// So the client can update UI on number of unapproved missions. 0 if passed.
 		'players': 						// Optional, null if pass == false
 			[
 				String, 
@@ -211,7 +189,7 @@ The server then tells each client the results:
 	/* TO CLIENT */
 	
 	{
-		'action': 'mission_vote',
+		'action': 'mission_vote_result',
 		'pass': Bool
 	}
 
