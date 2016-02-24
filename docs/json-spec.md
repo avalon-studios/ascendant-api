@@ -141,7 +141,7 @@ After a mission has been proposed, the player list gets sent to every client so 
 	/* TO CLIENT */
 	
 	{
-		'action': 'propose_mission_vote',
+		'action': 'do_proposal_vote',
 		'player_ids':
 			[
 				String,
@@ -166,7 +166,7 @@ The server tells the clients whether or not the vote passed, so it can update th
 	/* TO CLIENT */
 	
 	{
-		'action': 'proposal_vote',
+		'action': 'proposal_vote_result',
 		'pass': Bool,
 		'number_failed': Int, 			// So the client can update UI on number of unapproved missions. 0 if passed.
 		'players': 						// Optional, null if pass == false
@@ -191,7 +191,7 @@ The server then tells each client the results:
 	/* TO CLIENT */
 	
 	{
-		'action': 'mission_vote',
+		'action': 'mission_vote_result',
 		'pass': Bool
 	}
 
