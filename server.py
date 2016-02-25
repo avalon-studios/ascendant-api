@@ -12,7 +12,7 @@ import logging
 import json
 import random
 from flask import Flask, render_template
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO, send, emit
 
 # set up Redis environment for use with heroku
 REDIS_URL = os.environ['REDISCLOUD_URL']
@@ -37,6 +37,25 @@ def room_id_generator():
 @app.route('/')
 def hello():
     return render_template('index.html')
+
+@socketio.on('create'):
+def create(json):
+
+    jsonString = 
+    """
+    {
+        "game_id": "asdf",
+        "player": {
+            "id": "abc",
+            "name": "Kyle",
+            "team": 0
+        }
+    }
+    """
+
+    json = json.loads(jsonString)
+
+    emit('create', json)
 
 # class to house the backend and websocket interface
 class GameInterface(object):
