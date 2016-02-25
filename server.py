@@ -40,10 +40,8 @@ def hello():
 
 @socketio.on('create')
 def create(json):
-    
-    data = {"game_id": "asdf", "player": {"id": "abc","name": "Kyle","team": 0}}
-
-    emit('create', json.dumps(data))
+    jsonString = '{"game_id": "asdf", "player": {"id": "abc","name": "Kyle","team": 0}}'
+    emit('create', jsonString, json=True)
 
 # class to house the backend and websocket interface
 class GameInterface(object):
