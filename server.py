@@ -41,17 +41,7 @@ def hello():
 @socketio.on('create'):
 def create(json):
 
-    jsonString = 
-    """
-    {
-        "game_id": "asdf",
-        "player": {
-            "id": "abc",
-            "name": "Kyle",
-            "team": 0
-        }
-    }
-    """
+    jsonString = '{"game_id": "asdf", "player": {"id": "abc","name": "Kyle","team": 0}}'
 
     json = json.loads(jsonString)
 
