@@ -40,6 +40,7 @@ def hello():
 
 @socketio.on('create')
 def create(json):
+    print(json)
     jsonString = '{"game_id": "asdf", "player": {"id": "abc","name": "Kyle","team": 0}}'
     emit('create', jsonString, json=True)
 
