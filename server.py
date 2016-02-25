@@ -41,8 +41,8 @@ def hello():
 @socketio.on('create')
 def create(json):
     print(json)
-    jsonString = '{"game_id": "dowi", "player": {"id": "abc","name": "Kyle","team": 0}}'
-    players = '[{"id": "abc","name": "Kyle","team": 0}]'
+    jsonString = {"game_id": "fwcs", "player": {"id": "abc","name": "Kyle","team": 0}}
+    players = [{"id": "abc","name": "Kyle","team": 0}]
     emit('create', jsonString, json=True)
     emit('update_players', players, json=True)
 
