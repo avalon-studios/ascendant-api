@@ -38,11 +38,11 @@ def room_id_generator():
 def hello():
     return render_template('index.html')
 
-@socketio.on('create'):
+@socketio.on('create')
 def create(json):
     jsonString = '{"game_id": "asdf", "player": {"id": "abc","name": "Kyle","team": 0}}'
-    # json = json.loads(jsonString)
-    emit('create', jsonString)
+    json = json.loads(jsonString)
+    emit('create', json)
 
 # class to house the backend and websocket interface
 class GameInterface(object):
