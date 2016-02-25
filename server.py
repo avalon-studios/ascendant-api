@@ -28,6 +28,9 @@ JOIN_ACTION             = 'join'
 VOTE_ACTION             = 'vote'
 PROPOSE_MISSION_ACTION  = 'propose'
 
+if __name__ == '__main__':
+    socketio.run(app)
+
 def room_id_generator():
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(4))
 
