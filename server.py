@@ -63,7 +63,7 @@ def on_join(data):
     player_id = data['id']
 
 # class to house the backend and websocket interface
-class GameInterface(object):
+class Game(object):
     """Game backend class"""
 
 
