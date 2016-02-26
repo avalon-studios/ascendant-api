@@ -48,7 +48,7 @@ def hello():
 def on_create(data):
     
     game_id = game_id_generator()
-    creator_id = uuid.uuid4()
+    creator_id = str(uuid.uuid4())
     name = data['name']
 
     creator = Player(creator_id, name)
