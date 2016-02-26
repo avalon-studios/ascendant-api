@@ -101,7 +101,7 @@ class Game(object):
         for player in self.players:
             json_players.append({'id': player.id, 'name': player.name, 'team': player.team})
 
-        socketio.emit('update_players', json_players, json=True, room=game_id)
+        socketio.emit('update_players', json_players, json=True, room=self.game_id)
 
 class Player(object):
     """Game player class"""
