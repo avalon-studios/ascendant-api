@@ -47,33 +47,61 @@ def hello():
 @socketio.on('create')
 def on_create(data):
     
+    # grab the info need to make a player
     game_id = game_id_generator()
     creator_id = str(uuid.uuid4())
     name = data['name']
 
+    # make a player and a game
     creator = Player(creator_id, name)
     game = Game(game_id, creator)
 
+    # save the game
     games[game_id] = game
 
-    emit('create', {'game_id': game_id, 'player': {'id': creator_id, 'name': name, 'team': 0}}, json=True)
+    # add the user to the game room
+    join_room(game_id)
+
+    # emit the creation back to the client
+    emit('create', {'game_id': game_id, 'player': {'id': creator.id, 'name': creator.name, 'team': creator.team}}, json=True)
 
 @socketio.on('join')
 def on_join(data):
-    player_id = data['id']
+
+    # get data needed for player
+    game_id = data['game_id']
+    player_id = str(uuid.uuid4())
+    name = data['name']
+
+    # create the player and join the room
+    player = Player(player_id, game_id)
+    join_room(game_id)
+
+    # add to the game (will emit the new player for us)
+    games[game_id].add_player(player)
+
 
 # class to house the backend and websocket interface
 class Game(object):
     """Game backend class"""
-
 
     def __init__(self, game_id, creator):
         self.game_id = game_id
         self.creator = creator
         self.players = [creator]
 
+    def add_player(self, player):
+        self.players.append(player)
+        self.update_players()
+
     def update_players():
-        socketio.send(players, json=True, room=game_id)
+
+        json_players = []
+
+        for player in self.players:
+            json_players.append({'id': player.id, 'name': player.name, 'team': player.team})
+
+        socketio.emit('update_players', json_players, json=True, room=game_id)
 
 class Player(object):
     """Game player class"""
@@ -81,6 +109,7 @@ class Player(object):
     def __init__(self, id, name):
         self.id = id
         self.name = name
+        self.team = 0
 
 
 
