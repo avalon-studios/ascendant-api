@@ -52,7 +52,7 @@ def on_create(data):
     name = data['name']
 
     creator = Player(creator_id, name)
-    game = game(game_id, creator)
+    game = Game(game_id, creator)
 
     games[game_id] = game
 
