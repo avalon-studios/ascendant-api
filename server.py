@@ -11,6 +11,7 @@ import os
 import logging
 import json
 import random
+import uuid
 from flask import Flask, render_template
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
@@ -28,11 +29,13 @@ JOIN_ACTION             = 'join'
 VOTE_ACTION             = 'vote'
 PROPOSE_MISSION_ACTION  = 'propose'
 
+games = {}
+
 if __name__ == '__main__':
     socketio.run(app)
 
-def room_id_generator():
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(4))
+def game_id_generator():
+    return ''.join(random.SystemRandom().choice(string.ascii_uppercase) for _ in range(4))
 
 @app.route('/')
 def hello():
@@ -41,6 +44,17 @@ def hello():
 @socketio.on('create')
 def on_create(data):
     
+    game_id = game_id_generator()
+    creator_id = uuid.uuid4()
+    name = data['name']
+
+    creator = Player(creator_id, name)
+    game = game(game_id, creator)
+
+    games[game_id] = game
+
+    send({'game_id': game_id, player: {'id': creator_id, 'name': name, 'team': 0}}, json=True)
+
 @socketio.on('join')
 def on_join(data):
     player_id = data['id']
@@ -49,12 +63,11 @@ def on_join(data):
 class GameInterface(object):
     """Game backend class"""
 
-    players = []
 
     def __init__(self, game_id, creator):
         self.game_id = game_id
         self.creator = creator
-        self.players.append(creator)
+        self.players = [creator]
 
     def update_players():
         socketio.send(players, json=True, room=game_id)
@@ -65,3 +78,7 @@ class Player(object):
     def __init__(self, id, name):
         self.id = id
         self.name = name
+
+
+
+
