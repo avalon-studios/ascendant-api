@@ -1,4 +1,4 @@
-# JSON Specifications
+# Socket.IO Specifications
 ## Syntax for every possible game action
 
 ### General:
@@ -15,7 +15,6 @@ Whenever a `Player` object is used, it should be a dict structured like so:
 
 Creating a game, the client will send a create event with their user-friendly name:
 
-	// event
 	@socketio.on('create')
 	def on_create(data):
 	
@@ -68,119 +67,94 @@ Then make sure you `update_players`! I don't think we should ack this — discu
 
 Only the person who created the game has the ability to start it:
 
-	/* TO SERVER */
+	@socketio.on('start')
+	def on_start(data):
 
-	{
-		'action': 'start',
-		'game_id': String
-	}
+where `data` is a dict:
 
-Upon receiving `start`, the server should check that there are enough players. If not, or if we eventually have other errors, it should tell the client:
+	{'game_id': String}
 
-	/* TO CLIENT */
+Upon receiving `start`, the server should check that there are enough players (though there should be, if start was sent. Double check of course). If there aren't enough players, ack an error. `error_message` should be a user readable description of what's wrong. If the start is successful, ack a success with no error message. 
 
-	{
-		'action': 'start_error',
-		'error_message': String
-	}
+	//ack:
+	return {'success': Bool, 'error_message': String}
 	
-If, however, there are enough players, the server should assign players to teams (assassins/knights), and send the following to every client:
+After a successful start, emit an `assign_roles` event to the clients.
 
-	/* TO CLIENT */
+	socketio.emit('assign_roles' {player: Player, players: [Player, Player...], json=True, room=game_id}
 
-	{
-		'action': 'assign_roles',
-		'player': Player,
-		'players': [Player, Player,...] // Need to update players once teams have been set
-	}
+Now the server should wait for a `ready` event from each client:
+
+	@socketio.on('ready')
+	def on_ready(data):
+	
+`data` will be a dict with a `game_id` and `player_id` and this should mark the player as ready, and ack with a success and error message if something went wrong:
+
+	// ack
+	return {'success': Bool, 'error_message': String}
 
 ### Gameplay Actions
 
 #### Leader Selection
 
-Once the game has begun, the server needs to begin selecting leaders. The action should be sent to every client so it can say "Player is selecting a mission team" and the client with the match ID will begin the selection process:
+Once the game has begun, the server needs to begin selecting leaders. The action should be sent to every client in the room so it can say "Player.name is selecting a mission team" and the client with the matching ID will begin the selection process:
 	
-	/* TO CLIENT */
-
-	{
-		'action': 'propose_mission',
-		'leader': String 				// user_id of the leader
-	}
+	socketio.emit('propose_mission', {'leader': Player}, json=True, room=game_id)
 
 #### Proposing a mission team
 
 When a leader has selected the players, they will send them to the server like so:
-
-	/* TO SERVER */
 	
-	{
-		'action': 'propose_mission',
-		'player_ids': 					 // OPEN TO DISCUSSION — but I think we only need to send IDs
-			[
-				String,
-				String,
-				String
-			]
-	}
+	@socketio.on('propose_mission')
+	def on_propose_mission(data):
+	
+where `data` is:
+
+	{'game_id': String, 'player_ids': [String, String...]}
+	
+This should check for the proper number of players and ack a success: 
+
+	// ack
+	return {'success': Bool, 'error_message': String}
 
 After a mission has been proposed, the player list gets sent to every client so they can vote:
 
-	/* TO CLIENT */
-	
-	{
-		'action': 'do_proposal_vote',
-		'player_ids':
-			[
-				String,
-				String,
-				String
-			]
-	}
-	
+	socketio.emit('do_proposal_vote', {'players': [Player, Player...]}, json=True, room=game_id)
+
+
 #### Mission playout
 
 Then the server waits for a vote from every client, which comes in like so:
 
-	/* TO SERVER */
+	@socketio.on('proposal_vote')
+	def on_proposal_vote(data):
 	
-	{
-		'action': 'proposal_vote',
-		'vote': Bool (true = accept, false = deny) 
-	}
+where `data` is a dictionary with a 'vote' key and player:
+ 
+	{'game_id': String, 'player_id': String, 'vote': Bool}
 
-The server tells the clients whether or not the vote passed, so it can update the UI
-	
-	/* TO CLIENT */
-	
-	{
-		'action': 'proposal_vote_result',
-		'pass': Bool,
-		'number_failed': Int, 			// So the client can update UI on number of unapproved missions. 0 if passed.
-		'players': 						// Optional, null if pass == false
-			[
-				String, 
-				String, 
-				String
-			]
-	}
+After all votes have been received, emit the result. `number_failed` is the number of proposals that have been denied so far (0 if pass == true). `players` is the players in the mission *if it passed*. That way they can start voting right away. 
+
+	socketio.emit('proposal_vote_result', {'pass': Bool, 'number_failed': Int, players: [Player, Player...]}, json=True, room=game_id)
 
 If the vote passed, the server sent the players participating, and those players send the server their vote:
 
-	/ * TO SERVER */
+	@socketio.on('mission_vote')
+	def on_mission_vote(data):
 	
-	{
-		'action': 'mission_vote',
-		'vote': Bool
-	}
+where `data` is a dict: 
+
+	{'vote': Bool, 'game_id': String}
+
+Ack when you receive the vote:
+	
+	// ack
+	return {'success': Bool, 'error_message': String}
 	
 The server then tells each client the results:
 
-	/* TO CLIENT */
-	
-	{
-		'action': 'mission_vote_result',
-		'pass': Bool
-	}
+	socketio.emit('mission_vote_result', {'pass': Bool, 'mission_number': Int}, json=True, room=game_id)
+
 
 Then the server picks the next leader and the cycle starts again.
 
