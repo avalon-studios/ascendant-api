@@ -56,7 +56,7 @@ def on_create(data):
 
     games[game_id] = game
 
-    send({'game_id': game_id, player: {'id': creator_id, 'name': name, 'team': 0}}, json=True)
+    send({'game_id': game_id, 'player': {'id': creator_id, 'name': name, 'team': 0}}, json=True)
 
 @socketio.on('join')
 def on_join(data):
