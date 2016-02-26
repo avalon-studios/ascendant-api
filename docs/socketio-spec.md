@@ -72,7 +72,7 @@ Only the person who created the game has the ability to start it:
 
 where `data` is a dict:
 
-	{'game_id': String}
+	{'game_id': String, 'player_id': String}
 
 Upon receiving `start`, the server should check that there are enough players (though there should be, if start was sent. Double check of course). If there aren't enough players, ack an error. `error_message` should be a user readable description of what's wrong. If the start is successful, ack a success with no error message. 
 
