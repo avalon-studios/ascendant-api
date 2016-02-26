@@ -74,7 +74,7 @@ def on_join(data):
     name = data['name']
 
     # create the player and join the room
-    player = Player(player_id, game_id)
+    player = Player(player_id, name)
     join_room(game_id)
 
     # add to the game (will emit the new player for us)
