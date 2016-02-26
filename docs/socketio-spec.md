@@ -1,79 +1,68 @@
 # JSON Specifications
 ## Syntax for every possible game action
 
-### TODO:
-
-- How do clients work? Do we need client IDs, and send them with every call, or can we identify simple from the client? The chat example seemed to suggest the latter.
-- In a similar vein, can a client object be associated with a game, or do we need to send a game_id with every action?
-
 ### General:
 
-Every JSON object (from now on referred to as an "action") sent or received will have an `action` key, used to identify what action is being performed. Each action will also have a `user` key, with an id for the user performing the action.
+Many events communicate data back to the client using an ack. I'll try to explain each event as clearly as possible. Keep in mind however, that to ack, one must ack from the @socketio.on() event function, so it may be difficult to separate the game logic as much as we'd like to. 
 
-Whenever a `Player` object is used, it should be a json object structured like so:
+Whenever a `Player` object is used, it should be a dict structured like so:
 
-	{
-		'id': String,
-		'name': String,
-		'team': Int (0 = good, 1 = bad)
-	}
+	{'id': String, 'name': String, 'team': Int}
 
 ### Game creation and joining, and starting:
 
 #### Creation:
 
-Creating a game, the client will send a create action with their user-friendly name:
+Creating a game, the client will send a create event with their user-friendly name:
 
-	/* TO SERVER */
-
-	{
-		'action': 'create'
-		'name': String
-	}
+	// event
+	@socketio.on('create')
+	def on_create(data):
 	
-Upon creation of the game, the server should send the client a user_id for the game, and a game_id:
+`data` will be a dictionary containing:
+
+	{'name': String}
+	
+The server should then ack (by using a return at the end of `on_create`) a game dictionary containing:
 
 	/* TO CLIENT */
 
-	{
-		'action': 'create',
-		'game_id': String,
-		'player': Player
-	}
+	{'game_id': String, 'player': Player}
 
 If the server cannot create a game, game_id should be null.
 
 #### Joining:
 
-To join an existing game, the client will send:
+To join an existing game, the client will call:
 
-	/* TO SERVER */
+	@socketio.on('join')
+	def on_join(data):
 
-	{
-		'action': 'join',
-		'name': String,
-		'game_id': String
-	}
+`data` will be a dictionary containing:
+
+	{'name': String, 'game_id': String}
 	
-The server should reply with a success bool, and error_message if success is false, and a list of existing players if the success is true:
+then server should ack (return):
 
-	/* TO CLIENT */
+	{'game_id': String, 'player': Player}
 
-	{
-		'action': 'join',
-		'game_id': String
-		'player': Player,
-		'players': [Player, Player,...]
-	}
 	
-Upon someone successfully joining, or a player leaving, the server should send an updated player list to *every* client in the game:
+Upon someone successfully joining, or a player leaving, the server should send an `update_players` event *every* client in the game room:
 
-	/* TO CLIENT */
+    socketio.emit('update_players', [Player, Player...], json=True, room=self.game_id)
+      
+#### Leaving:
 
-	{
-		'action': 'update_players',
-		'players': [Player, Player,...]
-	}
+To leave a game, we call:
+
+	@socketio.on('leave')
+	def on_join(data):
+	
+`data` will be a dictionary containing:
+
+	{'player_id': String, 'game_id': String}
+	
+Then make sure you `update_players`! I don't think we should ack this — discuss?
 
 #### Starting the game:
 
