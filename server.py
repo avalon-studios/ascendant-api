@@ -77,10 +77,10 @@ def on_join(data):
     player = Player(player_id, name)
     join_room(game_id)
 
+    emit('join', {'game_id': game_id, 'player': {'id': player.id, 'name': player.name, 'team': player.team}}, json=True)
+
     # add to the game (will emit the new player for us)
     games[game_id].add_player(player)
-
-    emit('join', {'game_id': game_id, 'player': {'id': player.id, 'name': player.name, 'team': player.team}}, json=True)
 
 # class to house the backend and websocket interface
 class Game(object):
