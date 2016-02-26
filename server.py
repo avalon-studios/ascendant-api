@@ -11,6 +11,7 @@ import os
 import logging
 import json
 import random
+import uuid
 from flask import Flask, render_template
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
@@ -28,15 +29,16 @@ JOIN_ACTION             = 'join'
 VOTE_ACTION             = 'vote'
 PROPOSE_MISSION_ACTION  = 'propose'
 
-# dictionary of the current game objects -- there is probably a better way to do this,
-# but for now this is the easiest.
-current_games = {}
+games = {}
 
 if __name__ == '__main__':
     socketio.run(app)
 
-def room_id_generator():
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(4))
+def game_id_generator():
+    
+    return 'ASDF'
+
+    # return ''.join(random.SystemRandom().choice(string.ascii_uppercase) for _ in range(4))
 
 @app.route('/')
 def hello():
@@ -45,23 +47,62 @@ def hello():
 @socketio.on('create')
 def on_create(data):
     
+    # grab the info need to make a player
+    game_id = game_id_generator()
+    creator_id = str(uuid.uuid4())
+    name = data['name']
+
+    # make a player and a game
+    creator = Player(creator_id, name)
+    game = Game(game_id, creator)
+
+    # save the game
+    games[game_id] = game
+
+    # add the user to the game room
+    join_room(game_id)
+
+    # emit the creation back to the client
+    emit('create', {'game_id': game_id, 'player': {'id': creator.id, 'name': creator.name, 'team': creator.team}}, json=True)
+
 @socketio.on('join')
 def on_join(data):
-    player_id = data['id']
+
+    # get data needed for player
+    game_id = str(data['game_id'])
+    player_id = str(uuid.uuid4())
+    name = data['name']
+
+    # create the player and join the room
+    player = Player(player_id, name)
+    join_room(game_id)
+
+    emit('join', {'game_id': game_id, 'player': {'id': player.id, 'name': player.name, 'team': player.team}}, json=True)
+
+    # add to the game (will emit the new player for us)
+    games[game_id].add_player(player)
 
 # class to house the backend and websocket interface
-class GameInterface(object):
+class Game(object):
     """Game backend class"""
-
-    players = []
 
     def __init__(self, game_id, creator):
         self.game_id = game_id
         self.creator = creator
-        self.players.append(creator)
+        self.players = [creator]
 
-    def update_players():
-        socketio.send(players, json=True, room=game_id)
+    def add_player(self, player):
+        self.players.append(player)
+        self.update_players()
+
+    def update_players(self):
+
+        json_players = []
+
+        for player in self.players:
+            json_players.append({'id': player.id, 'name': player.name, 'team': player.team})
+
+        socketio.emit('update_players', json_players, json=True, room=self.game_id)
 
 class Player(object):
     """Game player class"""
@@ -69,3 +110,8 @@ class Player(object):
     def __init__(self, id, name):
         self.id = id
         self.name = name
+        self.team = 0
+
+
+
+
