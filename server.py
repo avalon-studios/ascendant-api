@@ -94,7 +94,7 @@ class Game(object):
         self.players.append(player)
         self.update_players()
 
-    def update_players():
+    def update_players(self):
 
         json_players = []
 
