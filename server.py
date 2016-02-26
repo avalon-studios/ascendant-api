@@ -35,7 +35,10 @@ if __name__ == '__main__':
     socketio.run(app)
 
 def game_id_generator():
-    return ''.join(random.SystemRandom().choice(string.ascii_uppercase) for _ in range(4))
+    
+    return 'ASDF'
+
+    # return ''.join(random.SystemRandom().choice(string.ascii_uppercase) for _ in range(4))
 
 @app.route('/')
 def hello():
