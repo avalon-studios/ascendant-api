@@ -69,7 +69,7 @@ def on_create(data):
 def on_join(data):
 
     # get data needed for player
-    game_id = data['game_id']
+    game_id = str(data['game_id'])
     player_id = str(uuid.uuid4())
     name = data['name']
 
