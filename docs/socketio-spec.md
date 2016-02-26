@@ -43,7 +43,7 @@ To join an existing game, the client will call:
 	
 then server should ack (return):
 
-	{'game_id': String, 'player': Player}
+	{'game_id': String, 'player': Player, 'players': [Player, Player...]}
 
 	
 Upon someone successfully joining, or a player leaving, the server should send an `update_players` event *every* client in the game room:
