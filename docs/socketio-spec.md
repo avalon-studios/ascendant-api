@@ -99,7 +99,7 @@ Now the server should wait for a `ready` event from each client:
 
 Once the game has begun, the server needs to begin selecting leaders. The action should be sent to every client in the room so it can say "Player.name is selecting a mission team" and the client with the matching ID will begin the selection process:
 	
-	socketio.emit('propose_mission', {'leader': Player}, json=True, room=game_id)
+	socketio.emit('propose_mission', {'leader': Player, 'mission_number': Int}, json=True, room=game_id)
 
 #### Proposing a mission team
 
