@@ -72,7 +72,7 @@ class AscendantGame(object):
 
         # player list
         self.players = [creator]
-        self.leader_index = 0
+        self.leader_index = -1
         
         # keep track of creator
         self.creator = creator

@@ -145,9 +145,11 @@ def on_ready(data):
     game = games[game_id]
     player = game.get_player(player_id)
 
+    debug('player {} is ready'.format(player.player_id))
     player.ready = True
 
     if game.all_ready():
+        debug('errybody ready')
         game.start_round()
         socketio.emit('propose_mission',
         {
