@@ -76,7 +76,7 @@ def on_join(data):
     name = data['name']
 
     # create the player and join the room
-    player = Player(player_id, name)
+    player = ascendant.Player(player_id, name)
     join_room(game_id)
 
     game = games[game_id]
