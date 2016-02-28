@@ -57,7 +57,7 @@ def on_propose(data):
     player = game.get_player(player_id)
 
     if player_id != game.leader.player_id:
-        return {'success': False, 'u r no leader'}
+        return {'success': False, 'error_message': 'u r no leader'}
 
     player.ready = True
 
