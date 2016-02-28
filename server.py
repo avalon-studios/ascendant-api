@@ -155,9 +155,10 @@ def on_ready(data):
         {
             'leader': game.get_leader().to_dict(),
             'mission_number': game.round_num,
+            'number_players': game.current_round.num_on_mission,
         },
         json=True,
-        room=game_id
+        room=game_id,
     )
 
     return {'success': True}
