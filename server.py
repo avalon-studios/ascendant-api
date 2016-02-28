@@ -153,8 +153,8 @@ def on_ready(data):
         game.start_round()
         socketio.emit('propose_mission',
         {
-            'leader': game.get_leader(),
-            'mission_number': game.round_num
+            'leader': game.get_leader().to_dict(),
+            'mission_number': game.round_num,
         },
         json=True,
         room=game_id
