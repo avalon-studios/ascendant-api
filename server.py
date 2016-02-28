@@ -67,7 +67,6 @@ def on_create(data):
 
 @socketio.on('join')
 def on_join(data):
-
     # get data needed for player
     game_id = str(data['game_id'])
     player_id = str(uuid.uuid4())
@@ -81,37 +80,4 @@ def on_join(data):
 
     # add to the game (will emit the new player for us)
     games[game_id].add_player(player)
-
-# class to house the backend and websocket interface
-class Game(object):
-    """Game backend class"""
-
-    def __init__(self, game_id, creator):
-        self.game_id = game_id
-        self.creator = creator
-        self.players = [creator]
-
-    def add_player(self, player):
-        self.players.append(player)
-        self.update_players()
-
-    def update_players(self):
-
-        json_players = []
-
-        for player in self.players:
-            json_players.append({'id': player.id, 'name': player.name, 'team': player.team})
-
-        socketio.emit('update_players', json_players, json=True, room=self.game_id)
-
-class Player(object):
-    """Game player class"""
-
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
-        self.team = 0
-
-
-
 
