@@ -21,10 +21,10 @@ from settings import *
 class Player(object):
     """Game player class"""
 
-    def __init__(self, player_id, real_name):
+    def __init__(self, player_id, name):
         self.player_id = player_id
-        self.real_name = real_name
-        self.team = -1
+        self.name = name
+        self.team = TEAM_NONE
 
 class GameRound(object):
     def __init__(self, num_required_to_fail, num_on_mission):
