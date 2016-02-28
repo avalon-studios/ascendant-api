@@ -17,7 +17,7 @@ from string import ascii_uppercase as uppercase
 
 # constants are defined in settings
 from settings import *
-from AscendantError import *
+from AscendantErrors import *
 
 class Player(object):
     """Game player class"""
