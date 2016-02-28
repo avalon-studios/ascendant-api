@@ -91,7 +91,7 @@ def on_join(data):
 
     if success:
         socketio.emit('update_players',
-            [p.to_dict() for p in game.players.values()],
+            [p.to_dict() for p in game.players],
             room=game_id,
             json=True
         )
@@ -100,7 +100,7 @@ def on_join(data):
             'success': True,
             'game_id': game_id,
             'player': player.to_dict(),
-            'players': [p.to_dict() for p in game.players.values()]
+            'players': [p.to_dict() for p in game.players]
         }
     else:
         return {'success': False, 'error_message': 'couldnt join the fuckin game'}
@@ -113,18 +113,18 @@ def on_start(data):
 
     # create the player and join the room
     game = games[game_id]
-    player = game.players[player_id]
+    player = game.get_player(player_id)
 
     if not game.is_ready_to_start():
         return {'success': False, 'error_message': 'too few players'}
 
     game.start_game()
 
-    for player in game.players.values():
+    for player in game.players:
         socketio.emit('assign_roles',
             {
                 'player': player.to_dict(show_team=True),
-                'players': [p.to_dict(show_team=player.team==TEAM_BAD) for p in game.players.values()],
+                'players': [p.to_dict(show_team=player.team==TEAM_BAD) for p in game.players],
             },
             json=True,
             room=player.player_id,
@@ -133,4 +133,29 @@ def on_start(data):
 
     return {'success': True}
 
+
+@socketio.on('ready')
+def on_ready(data):
+    # get data needed for player
+    game_id = data['game_id']
+    player_id = data['player_id']
+
+    # create the player and join the room
+    game = games[game_id]
+    player = game.get_player(player_id)
+
+    player.ready = True
+
+    if game.all_ready():
+        game.start_round()
+        socketio.emit('propose_mission',
+        {
+            'leader': game.get_leader(),
+            'mission_number': game.round_num
+        },
+        json=True,
+        room=game_id
+    )
+
+    return {'success': True}
 

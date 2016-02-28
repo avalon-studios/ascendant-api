@@ -25,6 +25,7 @@ class Player(object):
         self.player_id = player_id
         self.name = name
         self.team = TEAM_NONE
+        self.ready = False
 
     def to_dict(self, show_team=False):
         return {'id': self.player_id, 'name': self.name, 'team': self.team if show_team else -1}
@@ -71,6 +72,8 @@ class AscendantGame(object):
 
         # player list
         self.players = {creator.player_id: creator}
+        self.turn_order = []
+        self.leader_index = 0
         
         # keep track of creator
         self.creator = creator
@@ -105,6 +108,18 @@ class AscendantGame(object):
         '''
         return max(MIN_NUM_OF_PLAYERS - len(self.players), 0)
 
+    def all_ready(self):
+        return all(p.ready for p in self.players)
+
+    def pick_leader(self):
+        self.leader_index = (self.leader_index + 1) % len(self.players)
+
+    def get_player(self, pid):
+        'much inefficient, very O(n)'
+        for player in self.players:
+            if player.player_id == pid:
+                return player
+        return None
 
     def start_game(self):
         '''
@@ -117,7 +132,7 @@ class AscendantGame(object):
             # yell at the developer who didn't check this
             raise AscendantError("Not Enough Players")
 
-        shuffled_players = self.players.values()
+        shuffled_players = self.players[:]
         random.shuffle(shuffled_players)
 
         # Essentially it is split up such that 2/3
