@@ -14,6 +14,9 @@ TEAM_BAD = 1
 MAX_NUM_OF_PLAYERS = 10
 MIN_NUM_OF_PLAYERS = 5
 
+GAMESTATE_JOINING = 0
+GAMESTATE_STARTED = 1
+
 # custom exception
 class AscendantError(Exception):
     def __init__(self, description):

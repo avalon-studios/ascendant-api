@@ -62,6 +62,7 @@ def on_create(data):
     debug('game {} created'.format(game_id))
     # add the user to the game room
     join_room(game_id)
+    join_room(creator.player_id)
 
     # emit the creation back to the client
     return {'game_id': game_id, 'player': creator.to_dict()}
@@ -94,11 +95,40 @@ def on_join(data):
         )
 
         return {
-            'succes': True,
+            'success': True,
             'game_id': game_id,
             'player': player.to_dict(),
-            'players': [p.to_dict() for p in game.players]
+            'players': [p.to_dict() for p in game.players.values()]
         }
     else:
-        return {'succes': False, 'error_message': 'couldnt join the fuckin game'}
+        return {'success': False, 'error_message': 'couldnt join the fuckin game'}
+
+@socketio.on('start')
+def on_start(data):
+    # get data needed for player
+    game_id = data['game_id']
+    player_id = data['player_id']
+
+    # create the player and join the room
+    game = games[game_id]
+    player = game.players[player_id]
+
+    if not game.is_ready_to_start():
+        return {'success': False, 'error_message': 'too few players'}
+
+    game.start_game()
+
+    for player in game.players.values():
+        socketio.emit('assign_roles',
+            {
+                'player': player.to_dict(show_team=True),
+                'players': [p.to_dict(show_team=player.team==TEAM_BAD) for p in game.players],
+            },
+            json=True,
+            room=player.player_id,
+        )
+            
+
+    return {'success': True}
+
 

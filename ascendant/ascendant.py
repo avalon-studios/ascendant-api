@@ -26,8 +26,8 @@ class Player(object):
         self.name = name
         self.team = TEAM_NONE
 
-    def to_dict(self):
-        return {'id': self.player_id, 'name': self.name, 'team': self.team}
+    def to_dict(self, show_team=False):
+        return {'id': self.player_id, 'name': self.name, 'team': self.team if show_team else -1}
 
 class GameRound(object):
     def __init__(self, num_required_to_fail, num_on_mission):
@@ -67,8 +67,10 @@ class AscendantGame(object):
     def __init__(self, game_id, creator):
         self.game_id = game_id
 
+        self.state = GAMESTATE_JOINING
+
         # player list
-        self.players = [creator]
+        self.players = {creator.player_id: creator}
         
         # keep track of creator
         self.creator = creator
@@ -79,11 +81,6 @@ class AscendantGame(object):
         # number won by bad team
         self.bad_won = 0  
 
-        # list of good players
-        self.good_players = []
-
-        # list of bad playerss
-        self.bad_players = []
 
     '''
     returns true if the player can be added to the map,
@@ -93,32 +90,25 @@ class AscendantGame(object):
     '''
     def add_player(self, player):
         if len(self.players) < MAX_NUM_OF_PLAYERS:
-            self.players.append(player)
+            self.players[player.player_id] = player
             return True
         else:
             return False
 
     def is_ready_to_start(self):
-        if len(self.players) >= MIN_NUM_OF_PLAYERS:
-            return True
-        else:
-            return False
+        return self.how_many_needed_to_start() == 0
 
     def how_many_needed_to_start(self):
         '''
         return the number of players necessary to have 
         enough, 0 if the game is ready to start
         '''
-        x = MIN_NUM_OF_PLAYERS - len(self.players)
-        return x if x > 0 else 0
+        return max(MIN_NUM_OF_PLAYERS - len(self.players), 0)
 
 
     def start_game(self):
         '''
-        start a game, allocate who is good and bad
-      
-        raise an exception if it doesn't work, else return
-        list of good players, list of bad players
+        start a game and assign teams
         '''
         # this should be called outside this function before 
         # the web handler calls this function, but just to make
@@ -127,15 +117,20 @@ class AscendantGame(object):
             # yell at the developer who didn't check this
             raise AscendantError("Not Enough Players")
 
-        shuffled_uuids = self.players[:]
-        random.shuffle(shuffled_uuids)
+        shuffled_players = self.players.keys()
+        random.shuffle(shuffled_players)
 
         # Essentially it is split up such that 2/3
         # of the players are good and 1/3 are bad
-        self.good_players = shuffled_uuids[0:int(math.floor((2.0/3.0) * len(self.players)))]
-        self.bad_players = shuffled_uuids[int(math.floor((2.0/3.0) * len(self.players))):]
+        n_good = int(2.0/3.0 * len(self.players))
 
-        return self.good_players, self.bad_players
+        for player in shuffled_players[0:n_good]:
+            player.team = TEAM_GOOD
+        for player in shuffled_players[n_good:]:
+            player.team = TEAM_BAD
+
+        self.state = GAMESTATE_STARTED
+
 
     
 
