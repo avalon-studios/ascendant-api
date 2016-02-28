@@ -89,9 +89,9 @@ class AscendantGame(object):
     # returns false if the game is full
     #
     # look into seeing if this needs to have a thread lock
-    def add_player(self, uuid_name, uf_name):
+    def add_player(self, player):
         if len(self.players) < MAX_NUM_OF_PLAYERS:
-            players
+            self.players.append(player)
             return True
         else:
             return False
