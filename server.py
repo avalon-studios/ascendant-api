@@ -50,7 +50,7 @@ def on_create(data):
 
     # make a player and a game
     creator = ascendant.Player(creator_id, name)
-    game = ascendant.Game(game_id, creator)
+    game = ascendant.AcendantGame(game_id, creator)
 
     # save the game
     games[game_id] = game
