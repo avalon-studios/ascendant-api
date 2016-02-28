@@ -71,7 +71,7 @@ class AscendantGame(object):
         self.state = GAMESTATE_JOINING
 
         # player list
-        self.players = [creator.player_id: creator]
+        self.players = [creator]
         self.leader_index = 0
         
         # keep track of creator
