@@ -26,6 +26,9 @@ class Player(object):
         self.name = name
         self.team = TEAM_NONE
 
+    def to_dict(self):
+        return {'id': self.player_id, 'name': self.name, 'team': self.team}
+
 class GameRound(object):
     def __init__(self, num_required_to_fail, num_on_mission):
         self.num_required_to_fail = num_required_to_fail

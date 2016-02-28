@@ -64,7 +64,9 @@ def on_create(data):
     join_room(game_id)
 
     # emit the creation back to the client
-    emit('create', {'game_id': game_id, 'player': {'id': creator.player_id, 'name': creator.name, 'team': creator.team}}, json=True)
+    return {'game_id': game_id, 'player': creator.to_dict()}
+
+    #emit('create', {'game_id': game_id, 'player': {'id': creator.player_id, 'name': creator.name, 'team': creator.team}}, json=True)
 
 @socketio.on('join')
 def on_join(data):
