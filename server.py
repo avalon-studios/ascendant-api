@@ -49,6 +49,7 @@ def on_create(data):
     name = data['name']
 
     # make a player and a game
+    game_id = ascendant.AscendantGame.gen_id()
     creator = ascendant.Player(creator_id, name)
     game = ascendant.AscendantGame(game_id, creator)
 

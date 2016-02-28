@@ -11,6 +11,7 @@ This particular library assumes that all the data necessary for each function to
 # python libraries
 import random
 import math
+from string import ascii_uppercase as uppercase
 
 # local libraries
 
@@ -53,6 +54,10 @@ class GameRound(object):
 
 # class that keeps track of the game state
 class AscendantGame(object):
+
+    @staticmethod
+    def gen_id():
+        return ''.join(random.choice(uppercase) for _ in range(5))
 
     # init file takes the game_id and Player that is
     # the creator
