@@ -89,7 +89,7 @@ def on_join(data):
 
     if success:
         socketio.emit('update_players',
-            [p.to_dict() for p in game.players],
+            [p.to_dict() for p in game.players.values()],
             room=game_id,
             json=True
         )
