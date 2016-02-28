@@ -122,7 +122,7 @@ def on_start(data):
         socketio.emit('assign_roles',
             {
                 'player': player.to_dict(show_team=True),
-                'players': [p.to_dict(show_team=player.team==TEAM_BAD) for p in game.players],
+                'players': [p.to_dict(show_team=player.team==TEAM_BAD) for p in game.players.values()],
             },
             json=True,
             room=player.player_id,
