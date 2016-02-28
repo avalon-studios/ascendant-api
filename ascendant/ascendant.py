@@ -99,7 +99,7 @@ class AscendantGame(object):
             return False
 
     def all_voted(self):
-        return len(self.round.votes) >= len(self.players)
+        return len(self.current_round.votes) >= len(self.players)
 
     def start_round(self):
         self.round_num += 1
