@@ -95,7 +95,7 @@ class AscendantGame(object):
     '''
     def add_player(self, player):
         if len(self.players) < MAX_NUM_OF_PLAYERS:
-            self.players[player.player_id] = player
+            self.players.append(player)
             return True
         else:
             return False
