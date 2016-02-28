@@ -84,7 +84,7 @@ def on_join(data):
 
     success = games[game_id].add_player(player)
 
-    debug('joining game. success: {}', success)
+    debug('joining game. success: {}'.format(success))
 
     if success:
         socketio.emit('update_players',
