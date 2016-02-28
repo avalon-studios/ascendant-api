@@ -34,6 +34,9 @@ PROPOSE_MISSION_ACTION  = 'propose'
 # temporarily use dictionary to store stuffs
 games = {}
 
+def debug(msg):
+    print(msg)
+
 if __name__ == '__main__':
     socketio.run(app)
 
@@ -56,6 +59,7 @@ def on_create(data):
     # save the game
     games[game_id] = game
 
+    debug('game {} created'.format(game_id))
     # add the user to the game room
     join_room(game_id)
 
