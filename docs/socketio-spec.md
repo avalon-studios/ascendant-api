@@ -144,7 +144,7 @@ If the vote passed, the server sent the players participating, and those players
 	
 where `data` is a dict: 
 
-	{'vote': Bool, 'game_id': String}
+	{'vote': Bool, 'game_id': String, 'player_id': String}
 
 Ack when you receive the vote:
 	
