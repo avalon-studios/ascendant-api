@@ -46,6 +46,36 @@ if __name__ == '__main__':
 def hello():
     return render_template('index.html')
 
+@socketio.on('propose_mission')
+def on_propose(data):
+    # get data needed for player
+    game_id = data['game_id']
+    player_id = data['player_id']
+
+    # create the player and join the room
+    game = games[game_id]
+    player = game.get_player(player_id)
+
+    if player_id != game.leader.player_id:
+        return {'success': False, 'u r no leader'}
+
+    player.ready = True
+
+    if game.all_ready():
+        debug('errybody ready')
+        game.start_round()
+        socketio.emit('propose_mission',
+        {
+            'leader': game.get_leader().to_dict(),
+            'mission_number': game.round_num,
+            'number_players': game.current_round.num_on_mission,
+        },
+        json=True,
+        room=game_id,
+    )
+
+    return {'success': True}
+
 @socketio.on('create')
 def on_create(data):
     
