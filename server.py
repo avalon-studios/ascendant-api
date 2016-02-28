@@ -51,6 +51,7 @@ def on_propose(data):
     # get data needed for player
     game_id = data['game_id']
     player_id = data['player_id']
+    player_ids = data['player_ids']
 
     # create the player and join the room
     game = games[game_id]
@@ -59,21 +60,9 @@ def on_propose(data):
     if player_id != game.leader.player_id:
         return {'success': False, 'error_message': 'u r no leader'}
 
-    player.ready = True
-
-    if game.all_ready():
-        debug('errybody ready')
-        game.start_round()
-        socketio.emit('propose_mission',
-        {
-            'leader': game.get_leader().to_dict(),
-            'mission_number': game.round_num,
-            'number_players': game.current_round.num_on_mission,
-        },
-        json=True,
-        room=game_id,
-    )
-
+    if len(player_ids) != game.current_round.num_on_mission:
+        return {'success': False, 'error_message': 'bad number of players'}
+        
     return {'success': True}
 
 @socketio.on('create')

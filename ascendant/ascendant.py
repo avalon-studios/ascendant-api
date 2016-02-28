@@ -15,9 +15,9 @@ from string import ascii_uppercase as uppercase
 
 # local libraries
 
-# constants are defined in settings
+# constants are defined in settings, also holds AscendantError
 from settings import *
-from AscendantErrors import *
+from errors import *
 
 class Player(object):
     """Game player class"""
@@ -45,9 +45,12 @@ class GameRound(object):
     def set_mission_members(self, member_list):
         # this shouldn't ever happen
         if len(member_list) != self.num_on_mission:
-            raise AscendantError('Given num of players on mission: {}; should be {}'.format(len(member_list), self.num_on_mission))
+            raise AscendantError('Given num of players on mission: {}; should be {}'.format(
+                len(member_list),
+                self.num_on_mission)
+            )
 
-            
+        self.players_on_mission = member_list
 
     def vote(self, passfail):
         if passfail:
@@ -139,7 +142,7 @@ class AscendantGame(object):
         # sure
         if not self.is_ready_to_start():
             # yell at the developer who didn't check this
-            raise NotEnoughPlayers("Not Enough Players")
+            raise AscendantError("Not Enough Players")
 
         shuffled_players = self.players[:]
         random.shuffle(shuffled_players)
