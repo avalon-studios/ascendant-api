@@ -71,8 +71,7 @@ class AscendantGame(object):
         self.state = GAMESTATE_JOINING
 
         # player list
-        self.players = {creator.player_id: creator}
-        self.turn_order = []
+        self.players = [creator.player_id: creator]
         self.leader_index = 0
         
         # keep track of creator
@@ -83,6 +82,9 @@ class AscendantGame(object):
 
         # number won by bad team
         self.bad_won = 0  
+
+        self.round_num = 0
+        self.current_round = None
 
 
     '''
@@ -98,6 +100,12 @@ class AscendantGame(object):
         else:
             return False
 
+    def start_round(self):
+        self.round_num += 1
+        self.leader_index = (self.leader_index + 1) % len(self.players)
+
+        self.current_round = GameRound(1, 3)
+
     def is_ready_to_start(self):
         return self.how_many_needed_to_start() == 0
 
@@ -111,15 +119,15 @@ class AscendantGame(object):
     def all_ready(self):
         return all(p.ready for p in self.players)
 
-    def pick_leader(self):
-        self.leader_index = (self.leader_index + 1) % len(self.players)
-
     def get_player(self, pid):
         'much inefficient, very O(n)'
         for player in self.players:
             if player.player_id == pid:
                 return player
         return None
+
+    def get_leader(self):
+        return self.players[self.leader_index]
 
     def start_game(self):
         '''
