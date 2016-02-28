@@ -62,6 +62,8 @@ def on_propose(data):
 
     if len(player_ids) != game.current_round.num_on_mission:
         return {'success': False, 'error_message': 'bad number of players'}
+
+    game.current_round.set_mission_members([game.get_player(pid) for pid in player_ids])
         
     return {'success': True}
 
