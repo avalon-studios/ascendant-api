@@ -17,6 +17,8 @@ import uuid
 from flask import Flask, render_template
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
+from ascendant.settings import *
+
 # set up Redis environment for use with heroku
 REDIS_URL = os.environ['REDISCLOUD_URL']
 REDIS_CHAN = 'game'

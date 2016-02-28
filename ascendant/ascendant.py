@@ -131,11 +131,3 @@ class AscendantGame(object):
 
         self.state = GAMESTATE_STARTED
 
-
-    
-
-    
-
-    
-
-
