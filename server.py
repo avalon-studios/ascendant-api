@@ -94,7 +94,7 @@ def on_vote(data):
             {
                 'pass': passed,
                 'votes': votes,
-            }
+            },
             json=True,
             room=game_id,
         )
