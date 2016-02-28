@@ -79,8 +79,24 @@ def on_join(data):
     player = Player(player_id, name)
     join_room(game_id)
 
-    emit('join', {'game_id': game_id, 'player': {'id': player.id, 'name': player.name, 'team': player.team}}, json=True)
+    game = games[game_id]
 
-    # add to the game (will emit the new player for us)
-    games[game_id].add_player(player)
+
+    success = games[game_id].add_player(player)
+
+    if success:
+        socketio.emit('update_players',
+            [p.to_dict() for p in game.players],
+            room=game_id,
+            json=True
+        )
+
+        return {
+            'succes': True,
+            'game_id': game_id,
+            'player': player.to_dict(),
+            'players': [p.to_dict() for p in game.players]
+        }
+    else:
+        return {'succes': False, 'error_message': 'couldnt join the fuckin game'}
 

@@ -68,7 +68,7 @@ class AscendantGame(object):
         self.game_id = game_id
 
         # player list
-        self. player_list = [creator]
+        self.players = [creator]
         
         # keep track of creator
         self.creator = creator
@@ -90,14 +90,14 @@ class AscendantGame(object):
     #
     # look into seeing if this needs to have a thread lock
     def add_player(self, uuid_name, uf_name):
-        if len(self.player_list) < MAX_NUM_OF_PLAYERS:
-            player_list
+        if len(self.players) < MAX_NUM_OF_PLAYERS:
+            players
             return True
         else:
             return False
 
     def is_ready_to_start(self):
-        if len(self.player_list) >= MIN_NUM_OF_PLAYERS:
+        if len(self.players) >= MIN_NUM_OF_PLAYERS:
             return True
         else:
             return False
@@ -105,7 +105,7 @@ class AscendantGame(object):
     # returns the number of players necessary to have 
     # enough, 0 if the game is ready to start
     def how_many_needed_to_start(self):
-        x = MIN_NUM_OF_PLAYERS - len(self.player_list)
+        x = MIN_NUM_OF_PLAYERS - len(self.players)
         return x if x > 0 else 0
 
     # function that will be called when user selects "start game"
@@ -121,13 +121,13 @@ class AscendantGame(object):
             # yell at the developer who didn't check this
             raise AscendantError("Not Enough Players")
 
-        shuffled_uuids = self.player_list[:]
+        shuffled_uuids = self.players[:]
         random.shuffle(shuffled_uuids)
 
         # Essentially it is split up such that 2/3
         # of the players are good and 1/3 are bad
-        self.good_players = shuffled_uuids[0:int(math.floor((2.0/3.0) * len(self.player_list)))]
-        self.bad_players = shuffled_uuids[int(math.floor((2.0/3.0) * len(self.player_list))):]
+        self.good_players = shuffled_uuids[0:int(math.floor((2.0/3.0) * len(self.players)))]
+        self.bad_players = shuffled_uuids[int(math.floor((2.0/3.0) * len(self.players))):]
 
         return self.good_players, self.bad_players
 
