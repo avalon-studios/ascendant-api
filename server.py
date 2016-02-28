@@ -57,7 +57,7 @@ def on_propose(data):
     game = games[game_id]
     player = game.get_player(player_id)
 
-    if player_id != game.leader.player_id:
+    if player_id != game.get_leader().player_id:
         return {'success': False, 'error_message': 'u r no leader'}
 
     if len(player_ids) != game.current_round.num_on_mission:
