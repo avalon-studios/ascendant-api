@@ -53,7 +53,6 @@ def on_propose(data):
     player_id = data['player_id']
     player_ids = data['player_ids']
 
-    # create the player and join the room
     game = games[game_id]
     player = game.get_player(player_id)
 
@@ -64,7 +63,43 @@ def on_propose(data):
         return {'success': False, 'error_message': 'bad number of players'}
 
     game.current_round.set_mission_members([game.get_player(pid) for pid in player_ids])
+
+    socketio.emit('do_proposal_vote', 
+        {'players': player_ids},
+        json=True,
+        room=game_id,
+    )
         
+    return {'success': True}
+
+
+@socketio.on('proposal_vote')
+def on_vote(data):
+    # get data needed for player
+    game_id = data['game_id']
+    player_id = data['player_id']
+    vote = data['vote']
+
+    game = games[game_id]
+    player = game.get_player(player_id)
+
+
+    game.current_round.vote(player_id, vote)
+
+    debug('player {} voted {}'.format(player_id, vote))
+    if game.all_voted():
+        passed, votes = game.get_votes()
+        debug('errybody voted. passed: {}'.format(passed))
+        socketio.emit('proposal_vote_result',
+            {
+                'pass': passed,
+                'votes': votes,
+            }
+            json=True,
+            room=game_id,
+        )
+        
+
     return {'success': True}
 
 @socketio.on('create')

@@ -38,9 +38,7 @@ class GameRound(object):
 
         self.stalled = 0
         self.players_on_mission = []
-
-        self.num_passes = 0
-        self.num_fails = 0
+        self.votes = {}
 
     def set_mission_members(self, member_list):
         # this shouldn't ever happen
@@ -52,12 +50,8 @@ class GameRound(object):
 
         self.players_on_mission = member_list
 
-    def vote(self, passfail):
-        if passfail:
-            self.num_passes += 1
-        else:
-            self.num_fails += 1
-
+    def vote(self, pid, vote):
+        self.votes[pid] = bool(vote)
 
 
 # class that keeps track of the game state
@@ -65,7 +59,7 @@ class AscendantGame(object):
 
     @staticmethod
     def gen_id():
-        return ''.join(random.choice(uppercase) for _ in range(50))
+        return ''.join(random.choice(uppercase) for _ in range(4))
 
     # init file takes the game_id and Player that is
     # the creator
@@ -104,6 +98,9 @@ class AscendantGame(object):
         else:
             return False
 
+    def all_voted(self):
+        return len(self.round.votes) >= len(self.players)
+
     def start_round(self):
         self.round_num += 1
         self.leader_index = (self.leader_index + 1) % len(self.players)
@@ -122,6 +119,10 @@ class AscendantGame(object):
 
     def all_ready(self):
         return all(p.ready for p in self.players)
+
+    def get_votes(self):    
+        passed = sum(1 if v else -1 for v in self.current_round.votes.values()) > 0
+        return passed, self.current_round.votes
 
     def get_player(self, pid):
         'much inefficient, very O(n)'
