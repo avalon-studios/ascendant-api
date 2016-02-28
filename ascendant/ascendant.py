@@ -85,10 +85,12 @@ class AscendantGame(object):
         # list of bad playerss
         self.bad_players = []
 
-    # returns true if the player can be added to the map,
-    # returns false if the game is full
-    #
-    # look into seeing if this needs to have a thread lock
+    '''
+    returns true if the player can be added to the map,
+    returns false if the game is full
+   
+    look into seeing if this needs to have a thread lock
+    '''
     def add_player(self, player):
         if len(self.players) < MAX_NUM_OF_PLAYERS:
             self.players.append(player)
@@ -102,18 +104,22 @@ class AscendantGame(object):
         else:
             return False
 
-    # returns the number of players necessary to have 
-    # enough, 0 if the game is ready to start
     def how_many_needed_to_start(self):
+        '''
+        return the number of players necessary to have 
+        enough, 0 if the game is ready to start
+        '''
         x = MIN_NUM_OF_PLAYERS - len(self.players)
         return x if x > 0 else 0
 
-    # function that will be called when user selects "start game"
-    # allocates who is good and bad
-    #
-    # raises an exception if it doesn't work, else returns
-    # list of good players, list of bad players
+
     def start_game(self):
+        '''
+        start a game, allocate who is good and bad
+      
+        raise an exception if it doesn't work, else return
+        list of good players, list of bad players
+        '''
         # this should be called outside this function before 
         # the web handler calls this function, but just to make
         # sure
