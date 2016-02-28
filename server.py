@@ -7,6 +7,8 @@ Chat Server
 This simple application uses WebSockets to run a primitive chat server.
 """
 
+import ascendant.ascendant as ascendant 
+
 import os
 import logging
 import json
@@ -29,16 +31,11 @@ JOIN_ACTION             = 'join'
 VOTE_ACTION             = 'vote'
 PROPOSE_MISSION_ACTION  = 'propose'
 
+# temporarily use dictionary to store stuffs
 games = {}
 
 if __name__ == '__main__':
     socketio.run(app)
-
-def game_id_generator():
-    
-    return 'ASDF'
-
-    # return ''.join(random.SystemRandom().choice(string.ascii_uppercase) for _ in range(4))
 
 @app.route('/')
 def hello():
@@ -48,13 +45,12 @@ def hello():
 def on_create(data):
     
     # grab the info need to make a player
-    game_id = game_id_generator()
     creator_id = str(uuid.uuid4())
     name = data['name']
 
     # make a player and a game
-    creator = Player(creator_id, name)
-    game = Game(game_id, creator)
+    creator = ascendant.Player(creator_id, name)
+    game = ascendant.Game(game_id, creator)
 
     # save the game
     games[game_id] = game
