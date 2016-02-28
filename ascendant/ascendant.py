@@ -65,7 +65,7 @@ class AscendantGame(object):
 
     @staticmethod
     def gen_id():
-        return ''.join(random.choice(uppercase) for _ in range(5))
+        return ''.join(random.choice(uppercase) for _ in range(50))
 
     # init file takes the game_id and Player that is
     # the creator
@@ -87,7 +87,7 @@ class AscendantGame(object):
         # number won by bad team
         self.bad_won = 0  
 
-        self.round_num = 0
+        self.round_num = -1
         self.current_round = None
 
 
