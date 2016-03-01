@@ -93,7 +93,7 @@ def on_mission_vote(data):
         socketio.emit('mission_vote_result', 
             {
                 'pass': passed,
-                'mission_number': game.current_round.round_num
+                'mission_number': game.round_num
             },
             json=True,
             room=game_id,

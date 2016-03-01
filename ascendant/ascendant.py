@@ -32,7 +32,7 @@ class Player(object):
         return {'id': self.player_id, 'name': self.name, 'team': self.team if show_team else -1}
 
 class GameRound(object):
-    def __init__(self, num_required_to_fail, num_on_mission, mission_num):
+    def __init__(self, num_required_to_fail, num_on_mission):
         self.num_required_to_fail = num_required_to_fail
         self.num_on_mission = num_on_mission
         self.mission_num = mission_num
