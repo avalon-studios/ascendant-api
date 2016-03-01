@@ -94,6 +94,7 @@ def on_vote(data):
             {
                 'pass': passed,
                 'votes': votes,
+                'players': [p.to_dict() for p in game.current_round.players_on_mission]
             },
             json=True,
             room=game_id,
@@ -160,7 +161,7 @@ def on_join(data):
             'players': [p.to_dict() for p in game.players]
         }
     else:
-        return {'success': False, 'error_message': 'couldnt join the fuckin game'}
+        return {'success': False, 'error_message': 'Unable to join game'}
 
 @socketio.on('start')
 def on_start(data):
@@ -173,7 +174,7 @@ def on_start(data):
     player = game.get_player(player_id)
 
     if not game.is_ready_to_start():
-        return {'success': False, 'error_message': 'too few players'}
+        return {'success': False, 'error_message': 'You need at least five players to start'}
 
     game.start_game()
 
