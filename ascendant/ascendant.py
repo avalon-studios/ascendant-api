@@ -118,6 +118,9 @@ class AscendantGame(object):
     def start_mission_voting(self):
         self.current_round.mission_votes = {}
 
+    def all_mission_voted(self):
+        return len(self.current_round.votes) == self.current_round.num_on_mission
+
     def is_ready_to_start(self):
         return self.how_many_needed_to_start() == 0
 
