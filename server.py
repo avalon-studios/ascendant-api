@@ -83,7 +83,7 @@ def on_mission_vote(data):
 
     game = games[game_id]
 
-    game.current_round.mission_vote(pid, vote)
+    game.current_round.mission_vote(player_id, vote)
 
     if game.all_mission_voted():
         socketio.emit('mission_vote_result', 
