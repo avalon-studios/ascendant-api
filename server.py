@@ -143,31 +143,6 @@ def on_vote(data):
     return {'success': True}
 
 
-@socketio.on('proposal_vote_seen')
-def on_vote_seen(data):
-    game_id = data['game_id']
-    player_id = data['player_id']
-
-    game = games[game_id]
-    player = game.get_player(player_id)
-
-    debug('player {} saw votes'.format(player_id))
-
-    player.seen_vote = True
-    if game.all_seen_votes():
-        debug('errybody seen votes.')
-        socketio.emit('proposal_vote_result',
-            {
-                'pass': passed,
-                'votes': votes,
-            },
-            json=True,
-            room=game_id,
-        )
-
-    return {'success': True}
-    
-
 @socketio.on('create')
 def on_create(data):
     
