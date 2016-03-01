@@ -56,7 +56,7 @@ class GameRound(object):
 
     def mission_vote(self, pid, vote):
         if pid in self.players_on_mission:
-            self.votes[pid] = bool(vote)
+            self.mission_votes[pid] = bool(vote)
 
 
 # class that keeps track of the game state
@@ -119,7 +119,7 @@ class AscendantGame(object):
         self.current_round.mission_votes = {}
 
     def all_mission_voted(self):
-        return len(self.current_round.votes) == self.current_round.num_on_mission
+        return len(self.current_round.mission_votes) >= self.current_round.num_on_mission
 
     def is_ready_to_start(self):
         return self.how_many_needed_to_start() == 0
@@ -140,6 +140,10 @@ class AscendantGame(object):
     def get_votes(self):    
         passed = sum(1 if v else -1 for v in self.current_round.votes.values()) > 0
         return passed, self.current_round.votes
+
+    def get_mission_result(self):    
+        passed = sum(1 if v else -1 for v in self.current_round.mission_votes.values()) > 0
+        return passed
 
     def get_player(self, pid):
         'much inefficient, very O(n)'

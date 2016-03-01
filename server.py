@@ -86,6 +86,8 @@ def on_mission_vote(data):
     game.current_round.mission_vote(player_id, vote)
 
     if game.all_mission_voted():
+        passed = game.get_mission_votes()
+        debug('errbody voted on mission. passed: {}'.format(passed))
         socketio.emit('mission_vote_result', 
             {
                 'pass': passed,
@@ -112,7 +114,7 @@ def on_vote(data):
     debug('player {} voted {}'.format(player_id, vote))
     if game.all_voted():
         passed, votes = game.get_votes()
-        debug('errybody voted. passed: {}'.format(passed))
+        debug('errybody voted on proposal. passed: {}'.format(passed))
         socketio.emit('proposal_vote_result',
             {
                 'pass': passed,
