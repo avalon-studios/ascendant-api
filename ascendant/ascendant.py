@@ -141,7 +141,7 @@ class AscendantGame(object):
         passed = sum(1 if v else -1 for v in self.current_round.votes.values()) > 0
         return passed, self.current_round.votes
 
-    def get_mission_result(self):    
+    def get_mission_votes(self):    
         passed = sum(1 if v else -1 for v in self.current_round.mission_votes.values()) > 0
         return passed
 

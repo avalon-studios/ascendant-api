@@ -121,7 +121,7 @@ def on_vote(data):
             {
                 'pass': passed,
                 'votes': votes,
-                'players': [p.to_dict() for p in game.current_round.players_on_mission]
+                'players': game.current_round.players_on_mission
             },
             json=True,
             room=game_id,
