@@ -85,6 +85,8 @@ def on_mission_vote(data):
 
     game.current_round.mission_vote(player_id, vote)
 
+    debug('{}'.format(game.all_mission_voted()))
+
     if game.all_mission_voted():
         passed = game.get_mission_votes()
         debug('errbody voted on mission. passed: {}'.format(passed))
