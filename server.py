@@ -96,7 +96,7 @@ def on_mission_vote(data):
             json=True,
             room=game_id,
         )
-
+    return {'success': True}
 
 @socketio.on('proposal_vote')
 def on_vote(data):
