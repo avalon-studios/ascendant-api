@@ -90,7 +90,7 @@ def on_mission_vote(data):
             {
                 'pass': passed,
                 'mission_number': game.current_round.round_num
-            }
+            },
             json=True,
             room=game_id,
         )
