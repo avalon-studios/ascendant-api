@@ -39,6 +39,7 @@ class GameRound(object):
         self.stalled = 0
         self.players_on_mission = []
         self.votes = {}
+        self.mission_votes = {}
 
     def set_mission_members(self, member_list):
         # this shouldn't ever happen
@@ -52,6 +53,10 @@ class GameRound(object):
 
     def vote(self, pid, vote):
         self.votes[pid] = bool(vote)
+
+    def mission_vote(self, pid, vote):
+        if pid in self.players_on_mission:
+            self.votes[pid] = bool(vote)
 
 
 # class that keeps track of the game state
@@ -103,9 +108,15 @@ class AscendantGame(object):
 
     def start_round(self):
         self.round_num += 1
-        self.leader_index = (self.leader_index + 1) % len(self.players)
-
         self.current_round = GameRound(1, 3)
+
+    def start_proposal(self):
+        self.leader_index = (self.leader_index + 1) % len(self.players)
+        self.state = GAMESTATE_PROPOSING
+        self.current_round.votes = {}
+
+    def start_mission_voting(self):
+        self.current_round.mission_votes = {}
 
     def is_ready_to_start(self):
         return self.how_many_needed_to_start() == 0
@@ -119,6 +130,9 @@ class AscendantGame(object):
 
     def all_ready(self):
         return all(p.ready for p in self.players)
+    
+    def all_seen_votes(self):
+        return all(p.seen_vote for p in self.players)
 
     def get_votes(self):    
         passed = sum(1 if v else -1 for v in self.current_round.votes.values()) > 0
@@ -157,5 +171,5 @@ class AscendantGame(object):
         for player in shuffled_players[n_good:]:
             player.team = TEAM_BAD
 
-        self.state = GAMESTATE_STARTED
+        self.state = GAMESTATE_READYING
 

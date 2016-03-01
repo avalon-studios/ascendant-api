@@ -46,6 +46,7 @@ if __name__ == '__main__':
 def hello():
     return render_template('index.html')
 
+
 @socketio.on('propose_mission')
 def on_propose(data):
     # get data needed for player
@@ -73,6 +74,28 @@ def on_propose(data):
     return {'success': True}
 
 
+@socketio.on('mission_vote')
+def on_mission_vote(data):
+    # get data needed for player
+    game_id = data['game_id']
+    player_id = data['player_id']
+    vote = data['vote']
+
+    game = games[game_id]
+
+    game.current_round.mission_vote(pid, vote)
+
+    if game.all_mission_voted():
+        socketio.emit('mission_vote_result', 
+            {
+                'pass': passed,
+                'mission_number': game.current_round.round_num
+            }
+            json=True,
+            room=game_id,
+        )
+
+
 @socketio.on('proposal_vote')
 def on_vote(data):
     # get data needed for player
@@ -98,9 +121,49 @@ def on_vote(data):
             json=True,
             room=game_id,
         )
-        
+
+        if not passed:
+            # redo the proposal
+            game.start_proposal()
+            socketio.emit('propose_mission',
+                {
+                    'leader': game.get_leader().to_dict(),
+                    'mission_number': game.round_num,
+                    'number_players': game.current_round.num_on_mission,
+                },
+                json=True,
+                room=game_id,
+            )
+        else:
+            game.start_mission_voting()
 
     return {'success': True}
+
+
+@socketio.on('proposal_vote_seen')
+def on_vote_seen(data):
+    game_id = data['game_id']
+    player_id = data['player_id']
+
+    game = games[game_id]
+    player = game.get_player(player_id)
+
+    debug('player {} saw votes'.format(player_id))
+
+    player.seen_vote = True
+    if game.all_seen_votes():
+        debug('errybody seen votes.')
+        socketio.emit('proposal_vote_result',
+            {
+                'pass': passed,
+                'votes': votes,
+            },
+            json=True,
+            room=game_id,
+        )
+
+    return {'success': True}
+    
 
 @socketio.on('create')
 def on_create(data):
@@ -125,7 +188,6 @@ def on_create(data):
     # emit the creation back to the client
     return {'game_id': game_id, 'player': creator.to_dict()}
 
-    #emit('create', {'game_id': game_id, 'player': {'id': creator.player_id, 'name': creator.name, 'team': creator.team}}, json=True)
 
 @socketio.on('join')
 def on_join(data):
@@ -161,6 +223,7 @@ def on_join(data):
         }
     else:
         return {'success': False, 'error_message': 'couldnt join the fuckin game'}
+
 
 @socketio.on('start')
 def on_start(data):
@@ -207,15 +270,16 @@ def on_ready(data):
     if game.all_ready():
         debug('errybody ready')
         game.start_round()
+        game.start_proposal()
         socketio.emit('propose_mission',
-        {
-            'leader': game.get_leader().to_dict(),
-            'mission_number': game.round_num,
-            'number_players': game.current_round.num_on_mission,
-        },
-        json=True,
-        room=game_id,
-    )
+            {
+                'leader': game.get_leader().to_dict(),
+                'mission_number': game.round_num,
+                'number_players': game.current_round.num_on_mission,
+            },
+            json=True,
+            room=game_id,
+        )
 
     return {'success': True}
 
