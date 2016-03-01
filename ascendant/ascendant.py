@@ -35,7 +35,6 @@ class GameRound(object):
     def __init__(self, num_required_to_fail, num_on_mission):
         self.num_required_to_fail = num_required_to_fail
         self.num_on_mission = num_on_mission
-        self.mission_num = mission_num
 
         self.stalled = 0
         self.players_on_mission = []
