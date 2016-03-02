@@ -106,9 +106,6 @@ class AscendantGame(object):
         else:
             return False
 
-    def try_rejoin(self, pid):
-        return self.get_player(pid)
-
     def all_voted(self):
         return len(self.current_round.votes) >= len(self.players)
 
@@ -175,6 +172,9 @@ class AscendantGame(object):
 
     def get_leader(self):
         return self.players[self.leader_index]
+
+    def get_failed_proposals(self):
+        
 
     def start_game(self):
         '''

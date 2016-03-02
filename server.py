@@ -214,7 +214,7 @@ def on_join(data):
             'player': player.to_dict(),
             'players': [p.to_dict() for p in game.players],
             'round_passes': game.round_passes,
-            'failed_proposals': game.current_round.number_failed_proposals
+            'failed_proposals': game.get_failed_proposals()
         }
 
     # create the player and join the game
