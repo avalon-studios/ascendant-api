@@ -212,7 +212,8 @@ def on_join(data):
         return {
             'success': True,
             'game_id': game_id,
-            'player': player.to_dict()
+            'player': player.to_dict(),
+            'players': [p.to_dict() for p in game.players]
         }
     else:
         return {'success': False, 'error_message': 'Unable to join game'}
