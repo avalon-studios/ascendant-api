@@ -174,7 +174,9 @@ class AscendantGame(object):
         return self.players[self.leader_index]
 
     def get_failed_proposals(self):
-        
+        if current_round:
+            return current_round.number_failed_proposals
+        return 0
 
     def start_game(self):
         '''
