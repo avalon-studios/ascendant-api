@@ -278,7 +278,7 @@ def on_ready(data):
     return {'success': True}
 
 
-@socketio.io('leave')
+@socketio.on('leave')
 def on_leave(data):
     # get data needed for player
     game_id = data['game_id']
