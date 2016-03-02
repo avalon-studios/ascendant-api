@@ -286,7 +286,7 @@ def on_leave(data):
 
     game = games[game_id]
 
-    success = game.remove.remove_player(player_id)
+    success = game.remove_player(player_id)
 
     if success:
         socketio.emit('update_players',
