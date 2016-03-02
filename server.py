@@ -305,7 +305,7 @@ def on_leave(data):
 
     success = game.remove_player(player_id)
 
-    debug('leaving game. success: {}'.format(success))
+    debug('trying to leaving game. success: {}'.format(success))
 
     if success:
         socketio.emit('update_players',
