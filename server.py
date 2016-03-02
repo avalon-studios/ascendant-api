@@ -39,13 +39,6 @@ games = {}
 def debug(msg):
     print(msg)
 
-def update_players():
-    socketio.emit('update_players',
-            [p.to_dict() for p in game.players],
-            room=game_id,
-            json=True
-        )
-
 if __name__ == '__main__':
     socketio.run(app)
 
@@ -227,7 +220,11 @@ def on_join(data):
     debug('joining game. success: {}'.format(success))
 
     if success:
-        update_players()
+        socketio.emit('update_players',
+            [p.to_dict() for p in game.players],
+            room=game_id,
+            json=True
+        )
 
         return {
             'success': True,
@@ -311,7 +308,11 @@ def on_leave(data):
     debug('leaving game. success: {}'.format(success))
 
     if success:
-        update_players()
+        socketio.emit('update_players',
+            [p.to_dict() for p in game.players],
+            room=game_id,
+            json=True
+        )
 
     return {'success': success}
 
