@@ -277,3 +277,25 @@ def on_ready(data):
 
     return {'success': True}
 
+
+@socketio.io('leave')
+def on_leave(data):
+    # get data needed for player
+    game_id = data['game_id']
+    player_id = data['player_id']
+
+    game = games[game_id]
+
+    success = game.remove.remove_player(player_id)
+
+    if success:
+        socketio.emit('update_players',
+                [p.to_dict() for p in game.players],
+                room=game_id,
+                json=True
+            )
+
+    return {'success': success}
+
+
+
