@@ -40,6 +40,7 @@ class GameRound(object):
         self.players_on_mission = []
         self.votes = {}
         self.mission_votes = {}
+        self.number_failed_proposals = 0
 
     def set_mission_members(self, member_list):
         # this shouldn't ever happen
@@ -81,10 +82,12 @@ class AscendantGame(object):
         self.creator = creator
 
         # number won by good team
-        self.good_won = 0 
+        self.good_won = 0
 
         # number won by bad team
-        self.bad_won = 0  
+        self.bad_won = 0
+
+        self.round_passes = []
 
         self.round_num = -1
         self.current_round = None
@@ -96,17 +99,25 @@ class AscendantGame(object):
    
     look into seeing if this needs to have a thread lock
     '''
-    def add_player(self, player):
+    def add_player(self, player):        
         if len(self.players) < MAX_NUM_OF_PLAYERS:
             self.players.append(player)
             return True
         else:
             return False
 
+    def try_rejoin(self, pid):
+        return get_player(pid)
+
     def all_voted(self):
         return len(self.current_round.votes) >= len(self.players)
 
     def start_round(self):
+
+        # safe the round pass/fail so we can send when someone rejoins
+        if self.current_round:
+            self.round_passes[round_num] = self.get_mission_votes()
+
         self.round_num += 1
         self.current_round = GameRound(1, 3)
 
@@ -139,6 +150,10 @@ class AscendantGame(object):
 
     def get_votes(self):    
         passed = sum(1 if v else -1 for v in self.current_round.votes.values()) > 0
+
+        if not passed:
+            current_round.number_failed_proposals += 1
+
         return passed, self.current_round.votes
 
     def get_mission_votes(self):    

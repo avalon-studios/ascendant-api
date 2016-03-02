@@ -39,6 +39,13 @@ games = {}
 def debug(msg):
     print(msg)
 
+def update_players():
+    socketio.emit('update_players',
+            [p.to_dict() for p in game.players],
+            room=game_id,
+            json=True
+        )
+
 if __name__ == '__main__':
     socketio.run(app)
 
@@ -135,7 +142,8 @@ def on_vote(data):
             {
                 'pass': passed,
                 'votes': votes,
-                'players': game.current_round.players_on_mission
+                'players': game.current_round.players_on_mission,
+                'number_failed_proposals': game.current_round.number_failed_proposals
             },
             json=True,
             room=game_id,
@@ -148,7 +156,7 @@ def on_vote(data):
                 {
                     'leader': game.get_leader().to_dict(),
                     'mission_number': game.round_num,
-                    'number_players': game.current_round.num_on_mission,
+                    'number_players': game.current_round.num_on_mission
                 },
                 json=True,
                 room=game_id,
@@ -189,25 +197,37 @@ def on_join(data):
     game_id = str(data['game_id'])
     player_id = str(uuid.uuid4())
     name = data['name']
+    old_id = data['old_id']
 
-    # create the player and join the room
-    player = ascendant.Player(player_id, name)
     join_room(game_id)
     join_room(player_id)
 
     debug(games)
     game = games[game_id]
 
+    old_player = game.try_rejoin(old_id)
+
+    if old_player:
+
+        debug('player {} is rejoining game {}'.format(old_id, game_id))
+
+        return {
+            'success': True,
+            'game_id': game_id,
+            'player': player.to_dict(),
+            'players': [p.to_dict() for p in game.players],
+            'round_passes': game.round_passes,
+            'failed_proposals': game.current_round.number_failed_proposals
+        }
+
+    # create the player and join the game
+    player = ascendant.Player(player_id, name)
     success = games[game_id].add_player(player)
 
     debug('joining game. success: {}'.format(success))
 
     if success:
-        socketio.emit('update_players',
-            [p.to_dict() for p in game.players],
-            room=game_id,
-            json=True
-        )
+        update_players()
 
         return {
             'success': True,
@@ -291,11 +311,7 @@ def on_leave(data):
     debug('leaving game. success: {}'.format(success))
 
     if success:
-        socketio.emit('update_players',
-                [p.to_dict() for p in game.players],
-                room=game_id,
-                json=True
-            )
+        update_players()
 
     return {'success': success}
 
