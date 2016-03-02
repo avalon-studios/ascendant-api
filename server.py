@@ -211,6 +211,7 @@ def on_join(data):
         return {
             'success': True,
             'game_id': game_id,
+            'rejoin': True,
             'player': player.to_dict(),
             'players': [p.to_dict() for p in game.players],
             'round_passes': game.round_passes,
@@ -234,6 +235,7 @@ def on_join(data):
 
         return {
             'success': True,
+            'rejoin': False,
             'game_id': game_id,
             'player': player.to_dict(),
             'players': [p.to_dict() for p in game.players]
