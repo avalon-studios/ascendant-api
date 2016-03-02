@@ -32,33 +32,63 @@ class Player(object):
         return {'id': self.player_id, 'name': self.name, 'team': self.team if show_team else -1}
 
 class GameRound(object):
-    def __init__(self, num_required_to_fail, num_on_mission):
-        self.num_required_to_fail = num_required_to_fail
-        self.num_on_mission = num_on_mission
+    def __init__(self, num_required_to_fail, num_required_for_mission):
 
-        self.stalled = 0
-        self.players_on_mission = []
-        self.votes = {}
+        # based on the round number and number of players
+        self.num_required_to_fail = num_required_to_fail
+        self.num_required_for_mission = num_required_for_mission
+
+        # the number of proposals that have failed this round
+        self.num_failed_proposals = 0
+
+        # the players going on this rounds mission
+        self.mission_members = []
+
+        # vote dictionaries for proposing and missions
+        self.proposal_votes = {}
         self.mission_votes = {}
-        self.number_failed_proposals = 0
+
+        # not sure...? I think Joseph put this here
+        self.stalled = 0
 
     def set_mission_members(self, member_list):
         # this shouldn't ever happen
-        if len(member_list) != self.num_on_mission:
+        if len(member_list) != self.mission_members:
             raise AscendantError('Given num of players on mission: {}; should be {}'.format(
                 len(member_list),
                 self.num_on_mission)
             )
 
-        self.players_on_mission = member_list
+        self.mission_members = member_list
 
-    def vote(self, pid, vote):
-        self.votes[pid] = bool(vote)
+    def proposal_vote(self, pid, vote):
+        self.proposal_votes[pid] = bool(vote)
 
     def mission_vote(self, pid, vote):
         if pid in self.players_on_mission:
             self.mission_votes[pid] = bool(vote)
 
+    def do_proposal_vote(self):    
+        passed = sum(1 if v else -1 for v in self.proposal_votes.values()) > 0
+
+        if not passed:
+            self.number_failed_proposals += 1
+
+        votes = self.proposal_votes
+        self.proposal_votes = {}
+
+        return passed, votes
+
+    def do_mission_vote(self):
+        passed = sum(1 if v else -1 for v in self.mission_votes.values()) > 0
+        return passed
+
+    def to_dict(self):
+        return {'num_failed_proposals': self.num_failed_proposals,
+                'mission_members': self.mission_members,
+                'proposal_votes': self.proposal_votes,
+                'mission_votes': self.mission_votes
+            }
 
 # class that keeps track of the game state
 class AscendantGame(object):
@@ -81,17 +111,9 @@ class AscendantGame(object):
         # keep track of creator
         self.creator = creator
 
-        # number won by good team
-        self.good_won = 0
-
-        # number won by bad team
-        self.bad_won = 0
-
-        self.round_passes = []
+        self.rounds = []
 
         self.round_num = -1
-        self.current_round = None
-
 
     '''
     returns true if the player can be added to the map,
@@ -106,27 +128,18 @@ class AscendantGame(object):
         else:
             return False
 
-    def all_voted(self):
-        return len(self.current_round.votes) >= len(self.players)
+    def all_voted_proposal(self):
+        return len(self.rounds[-1].votes) >= len(self.players)
 
-    def start_round(self):
-
-        # safe the round pass/fail so we can send when someone rejoins
-        if self.current_round:
-            self.round_passes[self.round_num] = self.get_mission_votes()
-
-        self.round_num += 1
-        self.current_round = GameRound(1, 3)
+    def propose_mission(self, pids):
+        rounds[-1].set_mission_members(pids)        
 
     def start_proposal(self):
         self.leader_index = (self.leader_index + 1) % len(self.players)
         self.state = GAMESTATE_PROPOSING
-        self.current_round.votes = {}
+        self.rounds[-1].proposal_votes = {}
 
-    def start_mission_voting(self):
-        self.current_round.mission_votes = {}
-
-    def all_mission_voted(self):
+    def all_voted_mission(self):
         return len(self.current_round.mission_votes) >= self.current_round.num_on_mission
 
     def is_ready_to_start(self):
@@ -141,21 +154,15 @@ class AscendantGame(object):
 
     def all_ready(self):
         return all(p.ready for p in self.players)
-    
-    def all_seen_votes(self):
-        return all(p.seen_vote for p in self.players)
 
-    def get_votes(self):    
-        passed = sum(1 if v else -1 for v in self.current_round.votes.values()) > 0
-
-        if not passed:
-            current_round.number_failed_proposals += 1
-
-        return passed, self.current_round.votes
+    def get_proposal_votes(self):
+        return rounds[-1].do_proposal_vote()
 
     def get_mission_votes(self):    
-        passed = sum(1 if v else -1 for v in self.current_round.mission_votes.values()) > 0
-        return passed
+        return rounds[-1].do_mission_vote()
+
+    def mission_vote(self, pid, vote):
+        self.rounds[-1].mission_vote(pid, vote)
 
     def get_player(self, pid):
         'much inefficient, very O(n)'
@@ -172,11 +179,6 @@ class AscendantGame(object):
 
     def get_leader(self):
         return self.players[self.leader_index]
-
-    def get_failed_proposals(self):
-        if self.current_round:
-            return self.current_round.number_failed_proposals
-        return 0
 
     def start_game(self):
         '''
@@ -203,3 +205,17 @@ class AscendantGame(object):
 
         self.state = GAMESTATE_READYING
 
+    def start_round(self):
+
+        self.round_num += 1
+
+        # change to take into account round num and number of players
+        self.rounds.append(GameRound(1, 3))
+
+    def to_dict(self):
+        return {'game_id': self.game_id,
+                'creator': self.creator.to_dict(),
+                'leader': self.get_leader().to_dict(),
+                'players': [p.to_dict() for p in self.players],
+                'rounds': [r.to_dict() for r in self.rounds]
+            }

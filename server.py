@@ -46,6 +46,94 @@ if __name__ == '__main__':
 def hello():
     return render_template('index.html')
 
+@socketio.on('create')
+def on_create(data):
+    
+    # grab the info need to make a player
+    creator_id = str(uuid.uuid4())
+    name = data['name']
+
+    # make a player and a game
+    game_id = ascendant.AscendantGame.gen_id()
+    creator = ascendant.Player(creator_id, name)
+    game = ascendant.AscendantGame(game_id, creator)
+
+    # save the game
+    games[game_id] = game
+
+    debug('game {} created'.format(game_id))
+    
+    # add the user to the game room
+    join_room(game_id)
+    join_room(creator.player_id)
+
+    # emit the creation back to the client
+    return {'game_id': game_id, 'player': creator.to_dict()}
+
+@socketio.on('join')
+def on_join(data):
+    # get data needed for player
+    game_id = str(data['game_id'])
+    player_id = str(uuid.uuid4())
+    name = data['name']
+    old_id = data['old_id']
+
+    debug(games)
+    
+    # get the game they're trying to join
+    game = None
+
+    try:
+        game = games[game_id]
+    except:
+        return {'success': False, 'error_message': 'We couldn\'t find a game with that room number'}
+    
+    # add them to the room for this game
+    join_room(game_id)
+
+    # attempt to get the player from the existing game with the old id
+    player = game.get_player(old_id)
+
+    debug('old id: {}'.format(old_id))
+    debug('old player: {}'.format(player))
+
+    # this means they're rejoining
+    if player:
+        debug('player {} is rejoining game {}'.format(old_id, game_id))
+
+        # add them to their own room
+        join_room(old_id)
+
+        return {
+            'success': True,
+            'rejoin': True,
+            'player': player.to_dict(),
+            'game': game.to_dict()
+        }
+
+    # create the player and join the game
+    player = ascendant.Player(player_id, name)
+    success = games[game_id].add_player(player)
+
+    debug('joining game. success: {}'.format(success))
+
+    join_room(player_id)
+
+    if success:
+        socketio.emit('update_players',
+            [p.to_dict() for p in game.players],
+            room=game_id,
+            json=True
+        )
+
+        return {
+            'success': True,
+            'rejoin': False,
+            'player': player.to_dict(),
+            'game': game.to_dict()
+        }
+    else:
+        return {'success': False, 'error_message': 'Unable to join game'}
 
 @socketio.on('propose_mission')
 def on_propose(data):
@@ -55,27 +143,29 @@ def on_propose(data):
     player_ids = data['player_ids']
 
     game = games[game_id]
+
     player = game.get_player(player_id)
 
     if player_id != game.get_leader().player_id:
         return {'success': False, 'error_message': 'u r no leader'}
 
-    if len(player_ids) != game.current_round.num_on_mission:
-        return {'success': False, 'error_message': 'bad number of players'}
-
-    game.current_round.set_mission_members(player_ids)
+    try:
+        game.propose_mission(player_ids)
+    except:
+        return {'success': False, 'error_message': 'Incorrect number of players received for this round'}
 
     socketio.emit('do_proposal_vote', 
         {'players': player_ids},
         json=True,
-        room=game_id,
+        room=game_id
     )
-        
+    
     return {'success': True}
 
 
 @socketio.on('mission_vote')
 def on_mission_vote(data):
+
     # get data needed for player
     game_id = data['game_id']
     player_id = data['player_id']
@@ -83,11 +173,11 @@ def on_mission_vote(data):
 
     game = games[game_id]
 
-    game.current_round.mission_vote(player_id, vote)
+    game.mission_vote(player_id, vote)
 
-    debug('{}'.format(game.all_mission_voted()))
+    debug('received all votes: {}'.format(game.all_voted_mission()))
 
-    if game.all_mission_voted():
+    if game.all_voted_mission():
         passed = game.get_mission_votes()
         debug('errbody voted on mission. passed: {}'.format(passed))
         socketio.emit('mission_vote_result', 
@@ -158,91 +248,6 @@ def on_vote(data):
             game.start_mission_voting()
 
     return {'success': True}
-
-
-@socketio.on('create')
-def on_create(data):
-    
-    # grab the info need to make a player
-    creator_id = str(uuid.uuid4())
-    name = data['name']
-
-    # make a player and a game
-    game_id = ascendant.AscendantGame.gen_id()
-    creator = ascendant.Player(creator_id, name)
-    game = ascendant.AscendantGame(game_id, creator)
-
-    # save the game
-    games[game_id] = game
-
-    debug('game {} created'.format(game_id))
-    # add the user to the game room
-    join_room(game_id)
-    join_room(creator.player_id)
-
-    # emit the creation back to the client
-    return {'game_id': game_id, 'player': creator.to_dict()}
-
-
-@socketio.on('join')
-def on_join(data):
-    # get data needed for player
-    game_id = str(data['game_id'])
-    player_id = str(uuid.uuid4())
-    name = data['name']
-    old_id = data['old_id']
-
-    debug(games)
-    game = games[game_id]
-
-    join_room(game_id)
-
-    player = game.get_player(old_id)
-
-    debug('old id: {}'.format(old_id))
-    debug('old player: {}'.format(player))
-
-    if player:
-
-        debug('player {} is rejoining game {}'.format(old_id, game_id))
-
-        join_room(old_id)
-
-        return {
-            'success': True,
-            'game_id': game_id,
-            'rejoin': True,
-            'player': player.to_dict(),
-            'players': [p.to_dict() for p in game.players],
-            'round_passes': game.round_passes,
-            'failed_proposals': game.get_failed_proposals()
-        }
-
-    # create the player and join the game
-    player = ascendant.Player(player_id, name)
-    success = games[game_id].add_player(player)
-
-    debug('joining game. success: {}'.format(success))
-
-    join_room(player_id)
-
-    if success:
-        socketio.emit('update_players',
-            [p.to_dict() for p in game.players],
-            room=game_id,
-            json=True
-        )
-
-        return {
-            'success': True,
-            'rejoin': False,
-            'game_id': game_id,
-            'player': player.to_dict(),
-            'players': [p.to_dict() for p in game.players]
-        }
-    else:
-        return {'success': False, 'error_message': 'Unable to join game'}
-
 
 @socketio.on('start')
 def on_start(data):
