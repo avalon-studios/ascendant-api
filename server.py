@@ -192,17 +192,21 @@ def on_join(data):
     name = data['name']
     old_id = data['old_id']
 
-    join_room(game_id)
-    join_room(player_id)
-
     debug(games)
     game = games[game_id]
 
-    old_player = game.try_rejoin(old_id)
+    join_room(game_id)
 
-    if old_player:
+    player = game.get_player(old_id)
+
+    debug('old id: {}'.format(old_id))
+    debug('old player: {}'.format(player))
+
+    if player:
 
         debug('player {} is rejoining game {}'.format(old_id, game_id))
+
+        join_room(old_id)
 
         return {
             'success': True,
@@ -218,6 +222,8 @@ def on_join(data):
     success = games[game_id].add_player(player)
 
     debug('joining game. success: {}'.format(success))
+
+    join_room(player_id)
 
     if success:
         socketio.emit('update_players',
