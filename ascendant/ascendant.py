@@ -155,8 +155,8 @@ class AscendantGame(object):
     def remove_player(self, pid):
         if self.state == GAMESTATE_JOINING and self.get_player(pid) in self.players:
             self.players.remove(self.get_player(pid))
-            return true
-        return false
+            return True
+        return False
 
     def get_leader(self):
         return self.players[self.leader_index]
