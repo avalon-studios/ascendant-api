@@ -63,7 +63,7 @@ def on_propose(data):
     if len(player_ids) != game.current_round.num_on_mission:
         return {'success': False, 'error_message': 'bad number of players'}
 
-    game.current_round.set_mission_members(player_ids)
+    game.set_mission_members(player_ids)
 
     socketio.emit('do_proposal_vote', 
         {'players': player_ids},
@@ -324,5 +324,46 @@ def on_leave(data):
 
     return {'success': success}
 
+@socketio.on('get_current_action'):
+def on_get_action(data):
+    game_id = data['game_id']
+    player_id = data['player_id']
 
+    game = games[game_id]
 
+    state = game.get_current_action(player_id)
+
+    if self.state == GAMESTATE_READYING:
+        return {'readying': True}
+    elif self.state == GAMESTATE_PROPOSING:
+        # this will trigger a leader setting
+        socketio.emit('propose_mission',
+            {
+                'leader': game.get_leader().to_dict(),
+                'mission_number': game.round_num,
+                'number_players': game.current_round.num_on_mission,
+            },
+            json=True,
+            room=player_id
+        )
+    elif self.state == GAMESTATE_PROPOSAL_VOTE:
+        # votes are a dict, so should we bother to check if 
+        # they already voted...?
+        socketio.emit('do_proposal_vote', 
+            {'players': game.current_round.players_on_mission},
+            json=True,
+            room=player_id
+        )
+    elif self.state == GAMESTATE_MISSION_VOTE:
+        passed, votes = game.get_votes()
+        socketio.emit('proposal_vote_result',
+            {
+                'pass': passed,
+                'votes': votes,
+                'players': game.current_round.players_on_mission,
+                'number_failed_proposals': game.current_round.number_failed_proposals
+            },
+            json=True,
+            room=player_id
+        )
+    return {}

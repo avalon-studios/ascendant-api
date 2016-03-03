@@ -124,6 +124,7 @@ class AscendantGame(object):
         self.current_round.votes = {}
 
     def start_mission_voting(self):
+        self.state = GAMESTATE_MISSION_VOTE
         self.current_round.mission_votes = {}
 
     def all_mission_voted(self):
@@ -177,6 +178,13 @@ class AscendantGame(object):
         if self.current_round:
             return self.current_round.number_failed_proposals
         return 0
+
+    def get_current_state(self):
+        return self.state
+
+    def set_mission_members(self, pids):
+        self.state = GAMESTATE_PROPOSAL_VOTE
+        self.current_round.set_mission_members(pids)
 
     def start_game(self):
         '''
