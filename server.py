@@ -324,7 +324,7 @@ def on_leave(data):
 
     return {'success': success}
 
-@socketio.on('get_current_action'):
+@socketio.on('get_current_action')
 def on_get_action(data):
     game_id = data['game_id']
     player_id = data['player_id']
