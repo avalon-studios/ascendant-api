@@ -1,4 +1,4 @@
-## Ascendant
+## Introduction
 
 Ascendant pits a team of Space Explorers on board the USS Ascendant against a nasty bunch of Mutineers. Lost on the edges of the universe, the explorers must complete three missions to return home. If the mutineers manage to thwart three missions, they gain control of the ship — and our explorers are lost forever. 
 
