@@ -136,7 +136,7 @@ def on_vote(data):
                 'pass': passed,
                 'votes': votes,
                 'players': game.current_round.players_on_mission,
-                'number_failed_proposals': game.current_round.number_failed_proposals
+                'failed_proposals': game.current_round.number_failed_proposals
             },
             json=True,
             room=game_id,
@@ -364,4 +364,3 @@ def on_get_action(data):
             json=True,
             room=player_id
         )
-        
