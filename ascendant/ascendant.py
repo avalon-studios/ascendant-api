@@ -113,7 +113,7 @@ class AscendantGame(object):
 
         # safe the round pass/fail so we can send when someone rejoins
         if self.current_round:
-            self.round_passes[self.round_num] = self.get_mission_votes()
+            self.round_passes.append(self.get_mission_votes())
 
         self.round_num += 1
         self.current_round = GameRound(1, 3)
@@ -151,6 +151,8 @@ class AscendantGame(object):
 
         if not passed:
             self.current_round.number_failed_proposals += 1
+        else:
+            self.current_round.number_failed_proposals = 0
 
         return passed, self.current_round.votes
 
