@@ -327,7 +327,7 @@ def on_leave(data):
 
     if len(game.players) == 0:
         debug('zero players left, deleting game {}'.format(game_id))
-        games[game_id] = None
+        del games[game_id]
 
     return {'success': success}
 
