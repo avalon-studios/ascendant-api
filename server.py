@@ -211,7 +211,7 @@ def on_join(data):
         return {
             'success': True,
             'game_id': game_id,
-            'rejoin': True,
+            'rejoin': game.get_current_state() != GAMESTATE_JOINING,
             'ready': player.ready,
             'player': player.to_dict(),
             'players': [p.to_dict() for p in game.players],
