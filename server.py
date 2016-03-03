@@ -219,6 +219,9 @@ def on_join(data):
             'failed_proposals': game.get_failed_proposals()
         }
 
+    if game.get_current_state() != GAMESTATE_JOINING:
+        return {'success': False, 'error_message': 'The game has already started, and you\'re not in it!'}
+
     # create the player and join the game
     player = ascendant.Player(player_id, name)
     success = games[game_id].add_player(player)
