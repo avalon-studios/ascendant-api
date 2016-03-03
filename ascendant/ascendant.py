@@ -150,7 +150,7 @@ class AscendantGame(object):
         passed = sum(1 if v else -1 for v in self.current_round.votes.values()) > 0
 
         if not passed:
-            current_round.number_failed_proposals += 1
+            self.current_round.number_failed_proposals += 1
 
         return passed, self.current_round.votes
 
