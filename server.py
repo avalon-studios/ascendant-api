@@ -325,6 +325,10 @@ def on_leave(data):
             json=True
         )
 
+    if len(game.players) == 0:
+        debug('zero players left, deleting game {}'.format(game_id))
+        games[game_id] = None
+
     return {'success': success}
 
 @socketio.on('get_current_action')
