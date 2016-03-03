@@ -334,7 +334,7 @@ def on_get_action(data):
     state = game.get_current_state()
     
     if state == GAMESTATE_PROPOSING:
-        # this will trigger a leader setting
+        # this will trigger a leader setting, even if they're not the leader
         socketio.emit('propose_mission',
             {
                 'leader': game.get_leader().to_dict(),
@@ -345,22 +345,28 @@ def on_get_action(data):
             room=player_id
         )
     elif state == GAMESTATE_PROPOSAL_VOTE:
+
         # votes are a dict, so should we bother to check if 
         # they already voted...?
-        socketio.emit('do_proposal_vote', 
-            {'players': game.current_round.players_on_mission},
-            json=True,
-            room=player_id
-        )
+        # yes, so they can't change their vote
+
+        if player_id not in game.current_round.votes.keys():
+            socketio.emit('do_proposal_vote', 
+                {'players': game.current_round.players_on_mission},
+                json=True,
+                room=player_id
+            )
     elif state == GAMESTATE_MISSION_VOTE:
-        passed, votes = game.get_votes()
-        socketio.emit('proposal_vote_result',
-            {
-                'pass': passed,
-                'votes': votes,
-                'players': game.current_round.players_on_mission,
-                'failed_proposals': game.current_round.number_failed_proposals
-            },
-            json=True,
-            room=player_id
-        )
+
+        if player_id not in game.current_round.mission_votes.keys():
+            passed, votes = game.get_votes()
+            socketio.emit('proposal_vote_result',
+                {
+                    'pass': passed,
+                    'votes': votes,
+                    'players': game.current_round.players_on_mission,
+                    'failed_proposals': game.current_round.number_failed_proposals
+                },
+                json=True,
+                room=player_id
+            )
