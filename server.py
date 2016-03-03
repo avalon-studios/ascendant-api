@@ -235,7 +235,6 @@ def on_join(data):
 
         return {
             'success': True,
-            'rejoin': False,
             'game_id': game_id,
             'player': player.to_dict(),
             'players': [p.to_dict() for p in game.players]
@@ -313,7 +312,7 @@ def on_leave(data):
 
     success = game.remove_player(player_id)
 
-    debug('trying to leaving game. success: {}'.format(success))
+    debug('trying to leave game: {}. success: {}'.format(game_id, success))
 
     if success:
         socketio.emit('update_players',
