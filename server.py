@@ -330,7 +330,7 @@ def on_get_action(data):
 
     game = games[game_id]
 
-    state = game.get_current_action(player_id)
+    state = game.get_current_state()
 
     if self.state == GAMESTATE_READYING:
         return {'readying': True}
