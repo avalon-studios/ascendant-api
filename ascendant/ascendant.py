@@ -110,13 +110,29 @@ class AscendantGame(object):
         return len(self.current_round.votes) >= len(self.players)
 
     def start_round(self):
-
         # safe the round pass/fail so we can send when someone rejoins
         if self.current_round:
             self.round_passes.append(self.get_mission_votes())
 
+        n_players = len(self.players)
         self.round_num += 1
-        self.current_round = GameRound(1, 3)
+        to_send = {
+            5: [2, 3, 2, 3, 3],
+            6: [2, 3, 3, 3, 4],
+            7: [2, 3, 3, 4, 4].
+            8: [3, 4, 4, 5, 5],
+            9: [3, 4, 4, 5, 5],
+            10: [3, 4, 4, 5, 5]
+        }
+        to_fail = {
+            5: [1, 1, 1, 1, 1],
+            6: [1, 1, 1, 1, 1],
+            7: [1, 1, 1, 2, 1],
+            8: [1, 1, 1, 2, 1],
+            9: [1, 1, 1, 2, 1],
+            10: [1, 1, 1, 2, 1],
+        }
+        self.current_round = GameRound(to_fail[n_players][self.round_num], table[n_players][self.round_num])
 
     def start_proposal(self):
         self.leader_index = (self.leader_index + 1) % len(self.players)
@@ -157,8 +173,8 @@ class AscendantGame(object):
         return passed, self.current_round.votes
 
     def get_mission_votes(self):    
-        passed = sum(1 if v else -1 for v in self.current_round.mission_votes.values()) > 0
-        return passed
+        fail_votes = self.current_round.mission_votes.values().count(False)
+        return fail_votes >= self.current_round.num_required_to_fail
 
     def get_player(self, pid):
         'much inefficient, very O(n)'
