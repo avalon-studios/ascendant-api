@@ -181,7 +181,7 @@ def on_create(data):
     join_room(creator.player_id)
 
     # emit the creation back to the client
-    return {'game_id': game_id, 'player': creator.to_dict()}
+    return {'game_id': game_id, 'player': creator.to_dict(), 'creator_id': creator.player_id}
 
 
 @socketio.on('join')
@@ -211,6 +211,7 @@ def on_join(data):
         return {
             'success': True,
             'game_id': game_id,
+            'creator_id': game.creator.player_id,
             'rejoin': game.get_current_state() != GAMESTATE_JOINING,
             'ready': player.ready,
             'player': player.to_dict(),
@@ -240,6 +241,7 @@ def on_join(data):
         return {
             'success': True,
             'game_id': game_id,
+            'creator_id': game.creator.player_id,
             'player': player.to_dict(),
             'players': [p.to_dict() for p in game.players]
         }
