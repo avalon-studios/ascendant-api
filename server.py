@@ -228,7 +228,7 @@ def on_join(data):
 
     # Check if it's the creator rejoining after leaving
     if old_id == game.creator.player_id:
-        player = creator
+        player = game.creator
 
     success = games[game_id].add_player(player)
 
