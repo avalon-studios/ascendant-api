@@ -225,6 +225,11 @@ def on_join(data):
 
     # create the player and join the game
     player = ascendant.Player(player_id, name)
+
+    # Check if it's the creator rejoining after leaving
+    if old_id == game.creator.player_id:
+        player = creator
+
     success = games[game_id].add_player(player)
 
     debug('joining game. success: {}'.format(success))
