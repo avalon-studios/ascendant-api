@@ -173,7 +173,10 @@ class AscendantGame(object):
         return passed, self.current_round.votes
 
     def get_mission_votes(self):    
-        fail_votes = self.current_round.mission_votes.values().count(False)
+        fail_votes = len([v for v in self.current_round.mission_votes.values() if not v])
+        print('votes are {}'.format(self.current_round.mission_votes.values()))
+        print('fail_votes is {}'.format(fail_votes))
+        print('required to fail is {}'.format(self.current_round.num_required_to_fail))
         return fail_votes >= self.current_round.num_required_to_fail
 
     def get_player(self, pid):
