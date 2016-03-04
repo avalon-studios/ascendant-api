@@ -132,7 +132,7 @@ class AscendantGame(object):
             9: [1, 1, 1, 2, 1],
             10: [1, 1, 1, 2, 1],
         }
-        self.current_round = GameRound(to_fail[n_players][self.round_num], table[n_players][self.round_num])
+        self.current_round = GameRound(to_fail[n_players][self.round_num], to_send[n_players][self.round_num])
 
     def start_proposal(self):
         self.leader_index = (self.leader_index + 1) % len(self.players)
