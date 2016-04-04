@@ -180,6 +180,8 @@ def on_create(data):
 
     # make a player and a game
     game_id = ascendant.AscendantGame.gen_id()
+    while game_id in games:
+        game_id = ascendant.AscendantGame.gen_id()
     creator = ascendant.Player(creator_id, name)
     game = ascendant.AscendantGame(game_id, creator)
 
