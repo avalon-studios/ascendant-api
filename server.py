@@ -39,8 +39,8 @@ games = {}
 def debug(msg):
     print(msg)
 
-def ack():
-    debug("ack")
+def ack(data):
+    debug(data['player_id'])
 
 if __name__ == '__main__':
     socketio.run(app)
