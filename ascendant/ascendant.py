@@ -40,7 +40,9 @@ class GameRound(object):
         self.players_on_mission = []
         self.votes = {}
         self.mission_votes = {}
-        self.number_failed_proposals = 0
+        # starts at -1 since each start_proposal call 
+        # increments it by 1
+        self.number_failed_proposals = -1
 
     def set_mission_members(self, member_list):
         # this shouldn't ever happen
@@ -135,6 +137,7 @@ class AscendantGame(object):
         self.current_round = GameRound(to_fail[n_players][self.round_num], to_send[n_players][self.round_num])
 
     def start_proposal(self):
+        self.current_round.number_failed_proposals += 1
         self.leader_index = (self.leader_index + 1) % len(self.players)
         self.state = GAMESTATE_PROPOSING
         self.current_round.votes = {}
@@ -174,7 +177,13 @@ class AscendantGame(object):
 
     def get_mission_votes(self):    
         fail_votes = len([v for v in self.current_round.mission_votes.values() if not v])
-        return not (fail_votes >= self.current_round.num_required_to_fail)
+        # returns true if it passes
+        if not (fail_votes >= self.current_round.num_required_to_fail):
+            self.good_won += 1;
+            return True
+        else:
+            self.bad_won += 1;
+            return False
 
     def get_player(self, pid):
         'much inefficient, very O(n)'
@@ -228,4 +237,12 @@ class AscendantGame(object):
             player.team = TEAM_BAD
 
         self.state = GAMESTATE_READYING
+
+    def is_over(self):
+        if self.good_won == NUM_WINS or self.bad_won == NUM_WINS:
+            return True
+        elif self.current_round.number_failed_proposals == MAX_NUM_ROUND_FAILS:
+            return True
+        else:
+            return False
 

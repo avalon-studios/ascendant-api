@@ -98,19 +98,23 @@ def on_mission_vote(data):
             json=True,
             room=game_id,
         )
-
-        # start the next round
-        game.start_round()
-        game.start_proposal()
-        socketio.emit('propose_mission',
-            {
-                'leader': game.get_leader().to_dict(),
-                'mission_number': game.round_num,
-                'number_players': game.current_round.num_on_mission,
-            },
-            json=True,
-            room=game_id,
-        )
+        
+        # if the game is over, end it
+        if game.is_over():
+            del games[game_id]
+        else:
+            # start the next round
+            game.start_round()
+            game.start_proposal()
+            socketio.emit('propose_mission',
+                {
+                    'leader': game.get_leader().to_dict(),
+                    'mission_number': game.round_num,
+                    'number_players': game.current_round.num_on_mission,
+                },
+                json=True,
+                room=game_id,
+            )
 
     return {'success': True}
 
@@ -145,16 +149,20 @@ def on_vote(data):
         if not passed:
             # redo the proposal
             game.start_proposal()
-            socketio.emit('propose_mission',
-                {
-                    'leader': game.get_leader().to_dict(),
-                    'mission_number': game.round_num,
-                    'number_players': game.current_round.num_on_mission
-                },
-                json=True,
-                room=game_id,
-            )
+            if game.is_over():
+                del games[game_id]
+            else:
+                socketio.emit('propose_mission',
+                    {
+                        'leader': game.get_leader().to_dict(),
+                        'mission_number': game.round_num,
+                        'number_players': game.current_round.num_on_mission
+                    },
+                    json=True,
+                    room=game_id,
+                )
         else:
+            game.reset_proposals()
             game.start_mission_voting()
 
     return {'success': True}
@@ -363,6 +371,7 @@ def on_get_action(data):
         # votes are a dict, so should we bother to check if 
         # they already voted...?
         # yes, so they can't change their vote
+        # --Kyle Bashour, talking to himself
 
         if player_id not in game.current_round.votes.keys():
             socketio.emit('do_proposal_vote', 
