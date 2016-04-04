@@ -154,7 +154,7 @@ class AscendantGame(object):
 
     def how_many_needed_to_start(self):
         '''
-        return the number of players necessary to have 
+        return the number of players necessary to have
         enough, 0 if the game is ready to start
         '''
         return max(MIN_NUM_OF_PLAYERS - len(self.players), 0)

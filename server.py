@@ -39,6 +39,9 @@ games = {}
 def debug(msg):
     print(msg)
 
+def ack(data):
+    debug(data['player_id'])
+
 if __name__ == '__main__':
     socketio.run(app)
 
@@ -248,7 +251,8 @@ def on_join(data):
         socketio.emit('update_players',
             [p.to_dict() for p in game.players],
             room=game_id,
-            json=True
+            json=True,
+            callback=ack
         )
 
         return {
@@ -337,7 +341,8 @@ def on_leave(data):
         socketio.emit('update_players',
             [p.to_dict() for p in game.players],
             room=game_id,
-            json=True
+            json=True,
+            callback=ack
         )
 
     if len(game.players) == 0:
