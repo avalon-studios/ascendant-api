@@ -14,6 +14,7 @@ import logging
 import json
 import random
 import uuid
+import time
 from flask import Flask, render_template
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
@@ -40,7 +41,30 @@ def debug(msg):
     print(msg)
 
 def ack(data):
-    debug('player: ' + data['player_id'])
+    #needs to get the player, and set the proper ack to true
+    game_id = games[data['game_id']
+    player_id = data['player_id']]
+    game_id.players[player_id]]
+    
+    if (ack_type == 'do_proposal_vote'):
+        player.ack_do_proposal_vote = True
+    elif (ack_type == 'mission_vote_result'):
+        player.ack_mission_vote_result = True
+    elif (ack_type == 'mission_vote_propose_mission'):
+        player.ack_mission_vote_propose_mission = True
+    elif (ack_type == 'proposal_vote_result'):
+        player.ack_proposal_vote_result = True
+    elif (ack_type == 'proposal_vote_propose_mission'):
+        player.ack_proposal_vote_propose_mission = True
+    elif (ack_type == 'join_update_players'):
+        player.ack_join_update_players = True
+    elif (ack_type == 'assign_roles'):
+        player.ack_assign_roles = True
+    elif (ack_type == 'ready_propose_mission'):
+        player.ack_ready_propose_mission = True
+    elif (ack_type == 'leave_update_players'):
+        player.ack_leave_update_players = True
+
 
 if __name__ == '__main__':
     socketio.run(app)
@@ -68,12 +92,17 @@ def on_propose(data):
 
     game.set_mission_members(player_ids)
 
-    socketio.emit('do_proposal_vote', 
-        {'players': player_ids},
-        json=True,
-        room=game_id,
-        callback=ack
-    )
+    while(!(game.all_acks_received('do_proposal_vote'))):
+        socketio.emit('do_proposal_vote',
+                      {'players': player_ids},
+                      json=True,
+                      room=game_id,
+                      callback=ack
+        )
+        time.sleep(1)
+
+    for player in game.players:
+        player.ack_do_proposal_vote = False
         
     return {'success': True}
 
@@ -94,15 +123,21 @@ def on_mission_vote(data):
     if game.all_mission_voted():
         passed = game.get_mission_votes()
         debug('errbody voted on mission. passed: {}'.format(passed))
-        socketio.emit('mission_vote_result', 
-            {
-                'pass': passed,
-                'mission_number': game.round_num
-            },
-            json=True,
-            room=game_id,
-            callback=ack
-        )
+        
+        while(!(game.all_acks_received('mission_vote_result'))):
+            socketio.emit('mission_vote_result',
+                          {
+                            'pass': passed,
+                            'mission_number': game.round_num
+                          },
+                          json=True,
+                          room=game_id,
+                          callback=ack
+            )
+            time.sleep(1)
+        
+        for player in game.players:
+            player.ack_mission_vote_result = False
         
         # if the game is over, end it
         if game.is_over():
@@ -111,16 +146,22 @@ def on_mission_vote(data):
             # start the next round
             game.start_round()
             game.start_proposal()
-            socketio.emit('propose_mission',
-                {
-                    'leader': game.get_leader().to_dict(),
-                    'mission_number': game.round_num,
-                    'number_players': game.current_round.num_on_mission,
-                },
-                json=True,
-                room=game_id,
-                callback=ack
-            )
+            
+            while(!(game.all_acks_received('mission_vote_propose_mission'))):
+                socketio.emit('propose_mission',
+                              {
+                                'leader': game.get_leader().to_dict(),
+                                'mission_number': game.round_num,
+                                'number_players': game.current_round.num_on_mission,
+                              },
+                              json=True,
+                              room=game_id,
+                              callback=ack
+                )
+                time.sleep(1)
+
+            for player in game.players:
+                player.ack_mission_vote_propose_mission = False
 
     return {'success': True}
 
@@ -141,17 +182,23 @@ def on_vote(data):
     if game.all_voted():
         passed, votes = game.get_votes()
         debug('errybody voted on proposal. passed: {}'.format(passed))
-        socketio.emit('proposal_vote_result',
-            {
-                'pass': passed,
-                'votes': votes,
-                'players': game.current_round.players_on_mission,
-                'failed_proposals': game.current_round.number_failed_proposals
-            },
-            json=True,
-            room=game_id,
-            callback=ack
-        )
+        
+        while(!(game.all_acks_received('proposal_vote_result'))):
+            socketio.emit('proposal_vote_result',
+                          {
+                            'pass': passed,
+                            'votes': votes,
+                            'players': game.current_round.players_on_mission,
+                            'failed_proposals': game.current_round.number_failed_proposals
+                          },
+                          json=True,
+                          room=game_id,
+                          callback=ack
+            )
+            time.sleep(1)
+        
+        for player in game.players:
+            player.ack_proposal_vote_result = False
 
         if not passed:
             # redo the proposal
@@ -159,16 +206,22 @@ def on_vote(data):
             if game.is_over():
                 del games[game_id]
             else:
-                socketio.emit('propose_mission',
-                    {
-                        'leader': game.get_leader().to_dict(),
-                        'mission_number': game.round_num,
-                        'number_players': game.current_round.num_on_mission
-                    },
-                    json=True,
-                    room=game_id,
-                    callback=ack
-                )
+                while(!(game.all_acks_received('proposal_vote_propose_mission'))):
+                    socketio.emit('propose_mission',
+                                  {
+                                    'leader': game.get_leader().to_dict(),
+                                    'mission_number': game.round_num,
+                                    'number_players': game.current_round.num_on_mission
+                                  },
+                                  json=True,
+                                  room=game_id,
+                                  callback=ack
+                    )
+                    time.sleep(1)
+                
+                for players in game.players:
+                    player.ack_proposal_vote_propose_mission = False
+    
         else:
             game.reset_proposals()
             game.start_mission_voting()
@@ -253,12 +306,17 @@ def on_join(data):
     join_room(player_id)
 
     if success:
-        socketio.emit('update_players',
-            [p.to_dict() for p in game.players],
-            room=game_id,
-            json=True,
-            callback=ack
-        )
+        while(!(game.all_acks_received('join_update_players'))):
+            socketio.emit('update_players',
+                          [p.to_dict() for p in game.players],
+                          room=game_id,
+                          json=True,
+                          callback=ack
+            )
+            time.sleep(1)
+        
+        for player in game.players:
+            player.ack_join_update_players
 
         return {
             'success': True,
@@ -287,16 +345,21 @@ def on_start(data):
     game.start_game()
 
     for player in game.players:
-        socketio.emit('assign_roles',
-            {
-                'player': player.to_dict(show_team=True),
-                'players': [p.to_dict(show_team=player.team==TEAM_BAD) for p in game.players],
-            },
-            json=True,
-            room=player.player_id,
-            callback=ack
-        )
-            
+        while(!(game.all_acks_received('assign_roles'))):
+            socketio.emit('assign_roles',
+                          {
+                            'player': player.to_dict(show_team=True),
+                            'players': [p.to_dict(show_team=player.team==TEAM_BAD) for p in game.players],
+                          },
+                          json=True,
+                          room=player.player_id,
+                          callback=ack
+            )
+            time.sleep(1)
+
+        for player in game.players:
+            player.ack_assign_roles = False
+    
 
     return {'success': True}
 
@@ -318,16 +381,22 @@ def on_ready(data):
         debug('errybody ready')
         game.start_round()
         game.start_proposal()
-        socketio.emit('propose_mission',
-            {
-                'leader': game.get_leader().to_dict(),
-                'mission_number': game.round_num,
-                'number_players': game.current_round.num_on_mission,
-            },
-            json=True,
-            room=game_id,
-            callback=ack
-        )
+        
+        while(!(game.all_acks_received('ready_propose_mission'))):
+            socketio.emit('propose_mission',
+                          {
+                          'leader': game.get_leader().to_dict(),
+                          'mission_number': game.round_num,
+                          'number_players': game.current_round.num_on_mission,
+                          },
+                          json=True,
+                          room=game_id,
+                          callback=ack
+            )
+            time.sleep(1)
+
+        for player in game.players:
+            player.ack_ready_propose_mission = False
 
     return {'success': True}
 
@@ -345,12 +414,17 @@ def on_leave(data):
     debug('trying to leave game: {}. success: {}'.format(game_id, success))
 
     if success:
-        socketio.emit('update_players',
-            [p.to_dict() for p in game.players],
-            room=game_id,
-            json=True,
-            callback=ack
-        )
+        while(!(game.all_acks_received('leave_update_players'))):
+            socketio.emit('update_players',
+                          [p.to_dict() for p in game.players],
+                          room=game_id,
+                          json=True,
+                          callback=ack
+            )
+            time.sleep(1)
+
+        for player in game.players:
+            player.ack_leave_update_players = False
 
     if len(game.players) == 0:
         debug('zero players left, deleting game {}'.format(game_id))

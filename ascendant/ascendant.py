@@ -27,6 +27,15 @@ class Player(object):
         self.name = name
         self.team = TEAM_NONE
         self.ready = False
+        self.ack_do_proposal_vote = False
+        self.ack_mission_vote_result = False
+        self.ack_mission_vote_propose_mission = False
+        self.ack_proposal_vote_result = False
+        self.ack_proposal_vote_propose_mission = False
+        self.ack_join_update_players = False
+        self.ack_assign_roles = False
+        self.ack_ready_propose_mission = False
+        self.ack_leave_update_players = False
 
     def to_dict(self, show_team=False):
         return {'id': self.player_id, 'name': self.name, 'team': self.team if show_team else -1}
@@ -245,4 +254,34 @@ class AscendantGame(object):
             return True
         else:
             return False
+
+    def all_acks_received(self, ack_type):
+        for player in game.players:
+            if (ack_type == 'do_proposal_vote'):
+                if (!(player.ack_do_proposal_vote)):
+                    return False
+            elif (ack_type == 'mission_vote_result'):
+                if (!(player.ack_mission_vote_result)):
+                    return False
+            elif (ack_type == 'mission_vote_propose_mission'):
+                if (!(player.ack_mission_vote_propose_mission)):
+                    return False
+            elif (ack_type == 'proposal_vote_result'):
+                if (!(player.ack_proposal_vote_result)):
+                    return False
+            elif (ack_type == 'proposal_vote_propose_mission'):
+                if(!(player.ack_proposal_vote_propose_mission)):
+                    return False
+            elif (ack_type == 'join_update_players'):
+                if(!(player.ack_join_update_players)):
+                    return False
+            elif (ack_type == 'assign_roles'):
+                if(!(player.ack_assign_roles)):
+                    return False
+            elif (ack_type == 'ready_propose_mission'):
+                if(!(player.ack_ready_propose_mission)):
+                    return False
+            elif (ack_type == 'leave_update_players'):
+                if(!(player.ack_leave_update_players)):
+                    return False
 
