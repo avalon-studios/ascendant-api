@@ -40,7 +40,7 @@ def debug(msg):
     print(msg)
 
 def ack(data):
-    debug(data['player_id'])
+    debug('player: ' + data['player_id'])
 
 if __name__ == '__main__':
     socketio.run(app)
@@ -72,6 +72,7 @@ def on_propose(data):
         {'players': player_ids},
         json=True,
         room=game_id,
+        callback=ack
     )
         
     return {'success': True}
@@ -100,6 +101,7 @@ def on_mission_vote(data):
             },
             json=True,
             room=game_id,
+            callback=ack
         )
         
         # if the game is over, end it
@@ -117,6 +119,7 @@ def on_mission_vote(data):
                 },
                 json=True,
                 room=game_id,
+                callback=ack
             )
 
     return {'success': True}
@@ -147,6 +150,7 @@ def on_vote(data):
             },
             json=True,
             room=game_id,
+            callback=ack
         )
 
         if not passed:
@@ -163,6 +167,7 @@ def on_vote(data):
                     },
                     json=True,
                     room=game_id,
+                    callback=ack
                 )
         else:
             game.reset_proposals()
@@ -289,6 +294,7 @@ def on_start(data):
             },
             json=True,
             room=player.player_id,
+            callback=ack
         )
             
 
@@ -320,6 +326,7 @@ def on_ready(data):
             },
             json=True,
             room=game_id,
+            callback=ack
         )
 
     return {'success': True}
@@ -369,7 +376,8 @@ def on_get_action(data):
                 'number_players': game.current_round.num_on_mission,
             },
             json=True,
-            room=player_id
+            room=player_id,
+            callback=ack
         )
     elif state == GAMESTATE_PROPOSAL_VOTE:
 
@@ -382,7 +390,8 @@ def on_get_action(data):
             socketio.emit('do_proposal_vote', 
                 {'players': game.current_round.players_on_mission},
                 json=True,
-                room=player_id
+                room=player_id,
+                callback=ack
             )
     elif state == GAMESTATE_MISSION_VOTE:
 
@@ -396,5 +405,6 @@ def on_get_action(data):
                     'failed_proposals': game.current_round.number_failed_proposals
                 },
                 json=True,
-                room=player_id
+                room=player_id,
+                callback=ack
             )
