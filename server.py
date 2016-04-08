@@ -106,7 +106,7 @@ def on_mission_vote(data):
         passed = game.get_mission_votes()
         debug('errbody voted on mission. passed: {}'.format(passed))
         
-        while(!(game.all_acks_received('mission_vote_result'))):
+        while(not(game.all_acks_received('mission_vote_result'))):
             socketio.emit('mission_vote_result',
                           {
                             'pass': passed,
@@ -129,7 +129,7 @@ def on_mission_vote(data):
             game.start_round()
             game.start_proposal()
             
-            while(!(game.all_acks_received('propose_mission'))):
+            while(not(game.all_acks_received('propose_mission'))):
                 socketio.emit('propose_mission',
                               {
                                 'leader': game.get_leader().to_dict(),
@@ -165,7 +165,7 @@ def on_vote(data):
         passed, votes = game.get_votes()
         debug('errybody voted on proposal. passed: {}'.format(passed))
         
-        while(!(game.all_acks_received('proposal_vote_result'))):
+        while(not(game.all_acks_received('proposal_vote_result'))):
             socketio.emit('proposal_vote_result',
                           {
                             'pass': passed,
@@ -188,7 +188,7 @@ def on_vote(data):
             if game.is_over():
                 del games[game_id]
             else:
-                while(!(game.all_acks_received('propose_mission'))):
+                while(not(game.all_acks_received('propose_mission'))):
                     socketio.emit('propose_mission',
                                   {
                                     'leader': game.get_leader().to_dict(),
@@ -290,7 +290,7 @@ def on_join(data):
     join_room(player_id)
 
     if success:
-        while(!(game.all_acks_received('update_players'))):
+        while(not(game.all_acks_received('update_players'))):
             socketio.emit('update_players',
                           [p.to_dict() for p in game.players],
                           room=game_id,
@@ -329,7 +329,7 @@ def on_start(data):
     game.start_game()
 
     for player in game.players:
-        while(!(game.all_acks_received('assign_roles'))):
+        while(not(game.all_acks_received('assign_roles'))):
             socketio.emit('assign_roles',
                           {
                             'player': player.to_dict(show_team=True),
@@ -366,7 +366,7 @@ def on_ready(data):
         game.start_round()
         game.start_proposal()
         
-        while(!(game.all_acks_received('propose_mission'))):
+        while(not(game.all_acks_received('propose_mission'))):
             socketio.emit('propose_mission',
                           {
                           'leader': game.get_leader().to_dict(),
@@ -398,7 +398,7 @@ def on_leave(data):
     debug('trying to leave game: {}. success: {}'.format(game_id, success))
 
     if success:
-        while(!(game.all_acks_received('update_players'))):
+        while(not(game.all_acks_received('update_players'))):
             socketio.emit('update_players',
                           [p.to_dict() for p in game.players],
                           room=game_id,
