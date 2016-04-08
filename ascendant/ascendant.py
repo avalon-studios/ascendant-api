@@ -256,7 +256,7 @@ class AscendantGame(object):
             return False
 
     def all_acks_received(self, ack_type):
-        for player in game.players:
+        for player in self.game.players:
             if (player.acks[ack_type] == False):
                 return False
         return True
