@@ -34,7 +34,7 @@ class Player(object):
             'proposal_vote_result': False,
             'update_players': False,
             'assign_roles': False,
-            'propose_mission': False,
+            'propose_mission': False
         }
 
     def to_dict(self, show_team=False):
