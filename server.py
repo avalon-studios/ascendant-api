@@ -74,7 +74,7 @@ def on_propose(data):
 
     game.set_mission_members(player_ids)
 
-    while(!(game.all_acks_received('do_proposal_vote'))):
+    while(not(game.all_acks_received('do_proposal_vote'))):
         socketio.emit('do_proposal_vote',
                       {'players': player_ids},
                       json=True,
