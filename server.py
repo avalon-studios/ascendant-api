@@ -84,7 +84,7 @@ def on_propose(data):
         time.sleep(1)
 
     for player in game.players:
-        player.ack_do_proposal_vote = False
+        player.acks['do_proposal_vote'] = False
         
     return {'success': True}
 
